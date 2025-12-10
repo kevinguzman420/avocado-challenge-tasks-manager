@@ -1,0 +1,21 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: avocado_postgres_dev
+    environment:
+      POSTGRES_USER: avocado_user
+      POSTGRES_PASSWORD: avocado_pass_2024
+      POSTGRES_DB: avocado_db
+    ports:
+      - "5433:5432"  # Usando puerto 5433 en host porque 5432 está ocupado
+    volumes:
+      - postgres_data_dev:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U avocado_user -d avocado_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_data_dev:
+    driver: local

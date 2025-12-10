@@ -1,0 +1,73 @@
+# ──────────────────────────────
+# Python / FastAPI (backend)
+# ──────────────────────────────
+backend/__pycache__/
+backend/*.pyc
+backend/*.pyo
+backend/*.pyd
+backend/.venv/
+backend/venv/
+backend/env/
+backend/.env
+backend/.env.local
+backend/instance/
+backend/.pytest_cache/
+backend/.coverage
+backend/htmlcov/
+backend/.tox/
+backend/.mypy_cache/
+backend/.ruff_cache/
+backend/.hypothesis/
+
+# Alembic migrations (solo los archivos autogenerados que cambian mucho)
+backend/app/db/migrations/versions/*_*.py
+!backend/app/db/migrations/versions/__init__.py
+
+# Base de datos local
+*.db
+*.sqlite3
+
+# Logs
+backend/logs/
+*.log
+
+# ──────────────────────────────
+# Node / React (frontend)
+# ──────────────────────────────
+frontend/node_modules/
+frontend/.env.local
+frontend/.env.development.local
+frontend/.env.test.local
+frontend/.env.production.local
+
+frontend/build/
+frontend/dist/
+frontend/.next/           # si algún día usas Next.js
+frontend/.cache/
+frontend/coverage/
+frontend/.cypress/
+
+# Archivos de IDE y sistema
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# ──────────────────────────────
+# Docker y archivos sensibles (raíz)
+# ──────────────────────────────
+.env
+.env.*
+!.env.example
+
+# Carpetas de build de Docker (si llegas a generar imágenes localmente)
+docker-data/
+postgres-data/
+
+# Archivos temporales
+*.tmp
+*.temp
+*.bak
