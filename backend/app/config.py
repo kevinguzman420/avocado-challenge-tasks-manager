@@ -29,7 +29,7 @@ class Settings(BaseSettings):
     debug: bool = False
     
     # CORS
-    backend_cors_origins: List[str] = []
+    backend_cors_origins: List[str] = ["http://localhost:5173"]
     
     model_config = SettingsConfigDict(
         env_file=str(ENV_FILE),

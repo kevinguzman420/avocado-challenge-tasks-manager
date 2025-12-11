@@ -5,7 +5,7 @@ from typing import Optional, List
 from sqlalchemy.orm import Session, joinedload
 
 from app.models.comment import Comment
-from app.schemas.comment import CommentCreate
+from app.schemas.comment import CommentCreate, CommentUpdate
 
 
 def get_comment(db: Session, comment_id: int) -> Optional[Comment]:
@@ -29,9 +29,9 @@ def get_task_comments(
     task_id: int,
     skip: int = 0,
     limit: int = 100
-) -> List[Comment]:
+) -> tuple[List[Comment], int]:
     """
-    Get all comments for a specific task.
+    Get all comments for a specific task with total count.
     
     Args:
         db: Database session
@@ -40,13 +40,19 @@ def get_task_comments(
         limit: Maximum number of records to return
         
     Returns:
-        List of Comment objects
+        Tuple of (List of Comment objects, total count)
     """
-    return db.query(Comment).options(
+    query = db.query(Comment).options(
         joinedload(Comment.user)
-    ).filter(Comment.task_id == task_id).order_by(
-        Comment.created_at.desc()
+    ).filter(Comment.task_id == task_id)
+    
+    total = query.count()
+    
+    comments = query.order_by(
+        Comment.created_at.asc()
     ).offset(skip).limit(limit).all()
+    
+    return comments, total
 
 
 def create_comment(
@@ -73,6 +79,36 @@ def create_comment(
         user_id=user_id
     )
     db.add(db_comment)
+    db.commit()
+    db.refresh(db_comment)
+    return db_comment
+
+
+def update_comment(
+    db: Session,
+    comment_id: int,
+    comment_update: CommentUpdate
+) -> Optional[Comment]:
+    """
+    Update a comment.
+    
+    Args:
+        db: Database session
+        comment_id: Comment ID
+        comment_update: Comment update schema
+        
+    Returns:
+        Updated Comment object or None if not found
+    """
+    db_comment = get_comment(db, comment_id)
+    if not db_comment:
+        return None
+    
+    # Update only provided fields
+    update_data = comment_update.model_dump(exclude_unset=True)
+    for field, value in update_data.items():
+        setattr(db_comment, field, value)
+    
     db.commit()
     db.refresh(db_comment)
     return db_comment

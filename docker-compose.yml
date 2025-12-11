@@ -1,0 +1,84 @@
+# Docker Compose - Avocado Task Manager
+# Development environment
+
+services:
+  # PostgreSQL Database
+  db:
+    image: postgres:16-alpine
+    container_name: avocado_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-avocado_db}
+      POSTGRES_USER: ${POSTGRES_USER:-avocado_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-avocado_pass_2024}
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "${POSTGRES_PORT:-5434}:5432"
+    networks:
+      - avocado_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-avocado_user} -d ${POSTGRES_DB:-avocado_db}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # FastAPI Backend
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.dev
+    container_name: avocado_backend
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-avocado_user}:${POSTGRES_PASSWORD:-avocado_pass_2024}@db:5432/${POSTGRES_DB:-avocado_db}
+      SECRET_KEY: ${SECRET_KEY:-dev-secret-key-not-for-production-12345678}
+      ALGORITHM: ${ALGORITHM:-HS256}
+      ACCESS_TOKEN_EXPIRE_MINUTES: ${ACCESS_TOKEN_EXPIRE_MINUTES:-60}
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:3000,http://localhost:5173}
+      ENV_FILE: /app/.env
+    volumes:
+      - ./backend/app:/app/app
+      - ./backend/alembic:/app/alembic
+      - ./backend/alembic.ini:/app/alembic.ini
+      - ./backend/tests:/app/tests
+      - ./backend/.env:/app/.env
+    ports:
+      - "${BACKEND_PORT:-8000}:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - avocado_network
+    command: >
+      sh -c "
+        echo '🥑 Waiting for database...' &&
+        sleep 5 &&
+        echo '📦 Running migrations...' &&
+        alembic upgrade head &&
+        echo '🚀 Starting development server with hot reload...' &&
+        uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+      "
+
+  # Adminer - Database Management Tool
+  adminer:
+    image: adminer:latest
+    container_name: avocado_adminer
+    restart: unless-stopped
+    ports:
+      - "${ADMINER_PORT:-8080}:8080"
+    depends_on:
+      - db
+    networks:
+      - avocado_network
+    environment:
+      ADMINER_DEFAULT_SERVER: db
+
+volumes:
+  postgres_data:
+    driver: local
+
+networks:
+  avocado_network:
+    driver: bridge

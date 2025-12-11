@@ -67,7 +67,9 @@ def login(
     print(form_data.username, form_data.password)
     # Authenticate user (username is email in OAuth2PasswordRequestForm)
     user = authenticate_user(db, email=form_data.username, password=form_data.password)
-    
+    print("user")
+    print(user)
+    print("user")
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -99,3 +101,22 @@ async def get_current_user_info(
         Current user information
     """
     return current_user
+
+# add and endpoint /users that returns a list of all users
+@router.get("/users", response_model=list[UserOut])
+def get_all_users(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """
+    Get a list of all users.
+    
+    Args:
+        db: Database session
+        current_user: Current authenticated user
+        
+    Returns:
+        List of all users
+    """
+    users = db.query(User).all()
+    return users

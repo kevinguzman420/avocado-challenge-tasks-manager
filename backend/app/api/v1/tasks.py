@@ -26,7 +26,7 @@ def create_task(
     current_user: User = Depends(get_current_user)
 ):
     """
-    Create a new task.
+    Create a new task assigned to the current user.
     
     Args:
         task: Task creation data
@@ -36,7 +36,9 @@ def create_task(
     Returns:
         Created task information
     """
-    new_task = crud_task.create_task(db, task, creator_id=current_user.id)
+    # Override assigned_to to always be the current user
+    task_data = task.model_copy(update={"assigned_to": current_user.id})
+    new_task = crud_task.create_task(db, task_data, creator_id=current_user.id)
     return new_task
 
 
@@ -46,8 +48,6 @@ def get_tasks(
     limit: int = Query(100, ge=1, le=100),
     completed: Optional[bool] = None,
     priority: Optional[str] = None,
-    created_by: Optional[int] = None,
-    assigned_to: Optional[int] = None,
     search: Optional[str] = None,
     sort_by: str = Query("created_at", description="Field to sort by"),
     sort_order: str = Query("desc", regex="^(asc|desc)$"),
@@ -55,15 +55,13 @@ def get_tasks(
     current_user: User = Depends(get_current_user)
 ):
     """
-    Get list of tasks with filtering, sorting, and pagination.
+    Get list of tasks assigned to the current user with filtering, sorting, and pagination.
     
     Args:
         skip: Number of records to skip
         limit: Maximum number of records to return
         completed: Filter by completion status
         priority: Filter by priority
-        created_by: Filter by creator user ID
-        assigned_to: Filter by assigned user ID
         search: Search term for title and description
         sort_by: Field to sort by
         sort_order: Sort order (asc/desc)
@@ -71,14 +69,14 @@ def get_tasks(
         current_user: Current authenticated user
         
     Returns:
-        Paginated list of tasks
+        Paginated list of tasks assigned to the current user
     """
-    # Build filters
+    # Build filters - always filter by current user's assigned tasks
     filters = TaskFilter(
         completed=completed,
         priority=priority,
-        created_by=created_by,
-        assigned_to=assigned_to,
+        created_by=None,
+        assigned_to=current_user.id,
         search=search
     )
     
@@ -105,22 +103,20 @@ def get_tasks(
 
 @router.get("/statistics", response_model=TaskStatistics)
 def get_task_statistics(
-    user_id: Optional[int] = Query(None, description="Filter statistics by user ID"),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
     """
-    Get task statistics.
+    Get task statistics for the current user.
     
     Args:
-        user_id: Optional user ID to filter statistics
         db: Database session
         current_user: Current authenticated user
         
     Returns:
-        Task statistics
+        Task statistics for the current user
     """
-    stats = crud_task.get_task_statistics(db, user_id=user_id)
+    stats = crud_task.get_task_statistics(db, user_id=current_user.id)
     return stats
 
 
@@ -131,7 +127,7 @@ def get_task(
     current_user: User = Depends(get_current_user)
 ):
     """
-    Get a specific task by ID.
+    Get a specific task by ID (only if assigned to current user).
     
     Args:
         task_id: Task ID
@@ -142,10 +138,14 @@ def get_task(
         Task information
         
     Raises:
-        NotFoundException: If task not found
+        NotFoundException: If task not found or not assigned to user
     """
     task = crud_task.get_task(db, task_id)
     if not task:
+        raise NotFoundException(resource="Task")
+    
+    # Check if task is assigned to current user
+    if task.assigned_to != current_user.id:
         raise NotFoundException(resource="Task")
     
     return task
@@ -159,7 +159,7 @@ def update_task(
     current_user: User = Depends(get_current_user)
 ):
     """
-    Update a task.
+    Update a task (only if assigned to current user).
     
     Args:
         task_id: Task ID
@@ -171,7 +171,7 @@ def update_task(
         Updated task information
         
     Raises:
-        NotFoundException: If task not found
+        NotFoundException: If task not found or not assigned to user
         ForbiddenException: If user doesn't have permission
     """
     # Get existing task
@@ -179,11 +179,9 @@ def update_task(
     if not existing_task:
         raise NotFoundException(resource="Task")
     
-    # Check permissions (only creator or assignee can update)
-    if existing_task.created_by != current_user.id and existing_task.assigned_to != current_user.id:
-        from app.crud.user import is_admin
-        if not is_admin(current_user):
-            raise ForbiddenException(detail="You don't have permission to update this task")
+    # Check permissions (only assigned user can update)
+    if existing_task.assigned_to != current_user.id:
+        raise ForbiddenException(detail="You don't have permission to update this task")
     
     # Update task
     updated_task = crud_task.update_task(db, task_id, task_update)
@@ -197,7 +195,7 @@ def delete_task(
     current_user: User = Depends(get_current_user)
 ):
     """
-    Delete a task.
+    Delete a task (only if assigned to current user).
     
     Args:
         task_id: Task ID
@@ -208,7 +206,7 @@ def delete_task(
         Success message
         
     Raises:
-        NotFoundException: If task not found
+        NotFoundException: If task not found or not assigned to user
         ForbiddenException: If user doesn't have permission
     """
     # Get existing task
@@ -216,11 +214,9 @@ def delete_task(
     if not existing_task:
         raise NotFoundException(resource="Task")
     
-    # Check permissions (only creator or admin can delete)
-    if existing_task.created_by != current_user.id:
-        from app.crud.user import is_admin
-        if not is_admin(current_user):
-            raise ForbiddenException(detail="You don't have permission to delete this task")
+    # Check permissions (only assigned user can delete)
+    if existing_task.assigned_to != current_user.id:
+        raise ForbiddenException(detail="You don't have permission to delete this task")
     
     # Delete task
     crud_task.delete_task(db, task_id)

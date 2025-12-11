@@ -15,12 +15,28 @@ class CommentCreate(CommentBase):
     pass
 
 
+class CommentUpdate(BaseModel):
+    """Schema for updating a comment."""
+    content: str = Field(..., min_length=1, description="Updated comment content")
+
+
+class UserInComment(BaseModel):
+    """Schema for user information in comments."""
+    id: int
+    email: str
+    full_name: str
+    
+    class Config:
+        from_attributes = True
+
+
 class CommentOut(CommentBase):
     """Schema for comment response."""
     id: int
     task_id: int
     user_id: int
     created_at: datetime
+    user: UserInComment
     
     class Config:
         from_attributes = True

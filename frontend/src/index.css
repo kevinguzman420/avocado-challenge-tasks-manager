@@ -1,0 +1,130 @@
+@import "tailwindcss";
+
+/* Smooth transitions for theme changes */
+* {
+  transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out,
+    color 0.2s ease-in-out;
+}
+
+.container {
+  display: grid;
+  grid-template-columns: 250px calc(100vw - 250px);
+  grid-template-rows: 64px calc(100vh - 64px);
+  gap: 0px 0px;
+  /* grid-auto-flow: row; */
+  grid-template-areas:
+    "sidebar header header"
+    "sidebar main main"
+    "sidebar main main";
+}
+
+.sidebar {
+  grid-area: sidebar;
+}
+
+.header {
+  grid-area: header;
+}
+
+.main {
+  grid-area: main;
+}
+
+@theme {
+  /* Definir colores para bg-* y text-* de Tailwind v4 usando las variables CSS */
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+  --color-secondary: hsl(var(--secondary));
+  --color-secondary-foreground: hsl(var(--secondary-foreground));
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+  --color-accent: hsl(var(--accent));
+  --color-accent-foreground: hsl(var(--accent-foreground));
+  --color-destructive: hsl(var(--destructive));
+  --color-destructive-foreground: hsl(var(--destructive-foreground));
+  --color-border: hsl(var(--border));
+  --color-input: hsl(var(--input));
+  --color-ring: hsl(var(--ring));
+}
+
+@layer base {
+  :root {
+    /* Light Mode - Basado en logo Avocado */
+    --background: 0 0% 98%;
+    --foreground: 240 100% 20%;
+    --card: 0 0% 100%;
+    --card-foreground: 240 100% 20%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 100% 20%;
+    --primary: 240 100% 50%; /* Azul del logo */
+    --primary-foreground: 0 0% 100%;
+    --secondary: 245 60% 95%;
+    --secondary-foreground: 240 100% 25%;
+    --muted: 240 20% 96%;
+    --muted-foreground: 240 10% 45%;
+    --accent: 245 70% 92%;
+    --accent-foreground: 240 100% 40%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 240 20% 90%;
+    --input: 240 20% 92%;
+    --ring: 240 100% 50%;
+    --chart-1: 240 100% 50%;
+    --chart-2: 280 80% 55%;
+    --chart-3: 200 70% 50%;
+    --chart-4: 160 60% 45%;
+    --chart-5: 320 70% 55%;
+    --radius: 0.5rem;
+    --sidebar-bg: 0 0% 95%;
+    --sidebar-border: 240 20% 88%;
+  }
+
+  .dark {
+    /* Dark Mode - Basado en logo Avocado con contraste */
+    --background: 240 20% 8%;
+    --foreground: 240 30% 95%;
+    --card: 240 18% 12%;
+    --card-foreground: 240 30% 95%;
+    --popover: 240 20% 10%;
+    --popover-foreground: 240 30% 95%;
+    --primary: 240 100% 60%; /* Azul brillante para dark mode */
+    --primary-foreground: 0 0% 100%;
+    --secondary: 240 15% 18%;
+    --secondary-foreground: 240 30% 90%;
+    --muted: 240 15% 15%;
+    --muted-foreground: 240 10% 60%;
+    --accent: 240 20% 20%;
+    --accent-foreground: 240 100% 70%;
+    --destructive: 0 70% 55%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 240 15% 20%;
+    --input: 240 15% 18%;
+    --ring: 240 100% 60%;
+    --chart-1: 240 100% 65%;
+    --chart-2: 280 75% 60%;
+    --chart-3: 200 70% 55%;
+    --chart-4: 160 60% 50%;
+    --chart-5: 320 70% 60%;
+    --sidebar-bg: 240 20% 10%;
+    --sidebar-border: 240 15% 18%;
+  }
+}
+
+@layer base {
+  body {
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
+    font-feature-settings: "rlig" 1, "calt" 1;
+    margin: 0;
+    min-width: 320px;
+    min-height: 100vh;
+  }
+
+  #root {
+    min-height: 100vh;
+  }
+}
