@@ -13,9 +13,11 @@ export interface Task {
 
 export interface User {
   id: number;
-  username: string;
+  username?: string;
   email: string;
-  role: 'admin' | 'user';
+  full_name?: string;
+  role: 'admin' | 'regular';
+  is_active?: boolean;
 }
 
 export interface AuthState {

@@ -10,7 +10,7 @@ import { useCommentsStore } from '../stores/commentsStore';
 import { tasksApi } from '../api/tasks';
 import { useAuthStore } from '../stores/authStore';
 import { Loader2, MessageSquare, Send, Trash2 } from 'lucide-react';
-import type { Comment, CreateCommentData } from '../types';
+import type { Comment } from '../types';
 
 const commentSchema = z.object({
   content: z.string().min(1, 'Comment cannot be empty').max(500, 'Comment too long'),
@@ -47,7 +47,7 @@ export function TaskComments({ taskId }: TaskCommentsProps) {
     resolver: zodResolver(commentSchema),
   });
 
-  const taskComments = comments[taskId] || [];
+  const taskComments = Array.isArray(comments[taskId]) ? comments[taskId] : [];
   const isLoading = loading[taskId] || false;
   const commentError = error[taskId];
 
@@ -61,7 +61,11 @@ export function TaskComments({ taskId }: TaskCommentsProps) {
     setLoading(taskId, true);
     setError(taskId, null);
     try {
-      const fetchedComments = await tasksApi.getTaskComments(taskId);
+      const response: any = await tasksApi.getTaskComments(taskId);
+      // Handle both array response and object with items
+      const fetchedComments = Array.isArray(response) 
+        ? response 
+        : (response?.items || response?.comments || []);
       setComments(taskId, fetchedComments);
     } catch (err: any) {
       setError(taskId, err.response?.data?.detail || 'Failed to load comments');
@@ -154,13 +158,20 @@ export function TaskComments({ taskId }: TaskCommentsProps) {
                   No comments yet. Be the first to comment!
                 </p>
               ) : (
-                taskComments.map((comment) => (
+                taskComments.map((comment) => {
+                  // Determinar el nombre del usuario a mostrar
+                  const displayName = comment.user?.username 
+                    || comment.user?.email 
+                    || (comment.user_id === user?.id ? (user?.full_name || user?.username || user?.email) : null)
+                    || 'Unknown User';
+                  
+                  return (
                   <div key={comment.id} className="border rounded-lg p-3 bg-muted/50">
                     <div className="flex justify-between items-start">
                       <div className="flex-1">
                         <div className="flex items-center space-x-2 mb-1">
                           <span className="font-medium text-sm">
-                            {comment.user?.username || 'Unknown User'}
+                            {displayName}
                           </span>
                           <span className="text-xs text-muted-foreground">
                             {new Date(comment.created_at).toLocaleString()}
@@ -180,7 +191,8 @@ export function TaskComments({ taskId }: TaskCommentsProps) {
                       )}
                     </div>
                   </div>
-                ))
+                  );
+                })
               )}
             </div>
           </CardContent>

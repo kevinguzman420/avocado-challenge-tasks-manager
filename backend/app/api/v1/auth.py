@@ -64,12 +64,8 @@ def login(
     Raises:
         HTTPException: If credentials are invalid
     """
-    print(form_data.username, form_data.password)
     # Authenticate user (username is email in OAuth2PasswordRequestForm)
     user = authenticate_user(db, email=form_data.username, password=form_data.password)
-    print("user")
-    print(user)
-    print("user")
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -84,7 +80,11 @@ def login(
         expires_delta=access_token_expires
     )
     
-    return {"access_token": access_token, "token_type": "bearer"}
+    return {
+        "access_token": access_token,
+        "token_type": "bearer",
+        "user": user
+    }
 
 
 @router.get("/me", response_model=UserOut)

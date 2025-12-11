@@ -11,6 +11,13 @@ export interface RegisterData {
 export interface LoginResponse {
   access_token: string;
   token_type: string;
+  user: {
+    id: number;
+    email: string;
+    full_name: string;
+    role: 'regular' | 'admin';
+    is_active: boolean;
+  };
 }
 
 export interface RegisterResponse {

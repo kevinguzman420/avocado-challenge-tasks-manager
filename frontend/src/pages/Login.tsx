@@ -54,7 +54,18 @@ function Login() {
 
     try {
       const response = await authApi.login(data.email, data.password);
-      login({ id: 0, username: data.email, email: data.email, role: 'user' }, response.access_token);
+      
+      // Mapear los datos del usuario del backend al formato del store
+      const user = {
+        id: response.user.id,
+        email: response.user.email,
+        username: response.user.email.split('@')[0], // Usar el nombre antes del @ como username
+        full_name: response.user.full_name,
+        role: response.user.role,
+        is_active: response.user.is_active,
+      };
+      
+      login(user, response.access_token);
       navigate('/');
     } catch (err: any) {
       setError(err.response?.data?.detail || 'Login failed. Please check your credentials.');

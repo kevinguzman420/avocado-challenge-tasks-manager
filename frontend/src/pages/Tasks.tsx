@@ -1,124 +1,141 @@
-import { useState, useEffect } from 'react';
-import { useTaskStore } from '../stores/taskStore';
-import { tasksApi } from '../api/tasks';
-import { Button } from '../components/ui/button';
-import { Input } from '../components/ui/input';
-import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
-import { Dialog, DialogContent, DialogTrigger } from '../components/ui/dialog';
-import { TaskForm } from '../components/TaskForm';
-import { TaskComments } from '../components/TaskComments';
-import { Plus, Search, Filter, Edit, Trash2, Loader2 } from 'lucide-react';
-import type { Task, TaskFilters } from '../types';
+import { useState, useEffect } from 'react'
+import { useTaskStore } from '../stores/taskStore'
+import { tasksApi } from '../api/tasks'
+import { Button } from '../components/ui/button'
+import { Input } from '../components/ui/input'
+import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '../components/ui/select'
+import { Dialog, DialogContent, DialogTrigger } from '../components/ui/dialog'
+import { TaskForm } from '../components/TaskForm'
+import { TaskComments } from '../components/TaskComments'
+import { Plus, Search, Filter, Edit, Trash2, Loader2 } from 'lucide-react'
+import type { Task, TaskFilters } from '../types'
 
 function Tasks() {
-  const { filteredTasks, filters, setFilters, setTasks, addTask, updateTask, deleteTask } = useTaskStore();
-  const [searchTerm, setSearchTerm] = useState('');
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [editingTask, setEditingTask] = useState<Task | undefined>();
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const {
+    filteredTasks,
+    filters,
+    setFilters,
+    setTasks,
+    addTask,
+    updateTask,
+    deleteTask,
+  } = useTaskStore()
+  const [searchTerm, setSearchTerm] = useState('')
+  const [isDialogOpen, setIsDialogOpen] = useState(false)
+  const [editingTask, setEditingTask] = useState<Task | undefined>()
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
   // Fetch tasks function
   const fetchTasks = async () => {
     try {
-      setIsLoading(true);
-      setError(null);
-      const response = await tasksApi.getTasks();
+      setIsLoading(true)
+      setError(null)
+      const response = await tasksApi.getTasks()
       // Backend returns 'items' instead of 'tasks'
-      setTasks(response.items || response.tasks || []);
-    } catch (err: any) {
-      setError(err.response?.data?.detail || 'Failed to load tasks');
-      console.error('Error fetching tasks:', err);
+      setTasks(response.items || response.tasks || [])
+    } catch (err) {
+      setError((err as any).response?.data?.detail || 'Failed to load tasks')
+      console.error('Error fetching tasks:', err)
     } finally {
-      setIsLoading(false);
+      setIsLoading(false)
     }
-  };
+  }
 
   // Fetch tasks on component mount
   useEffect(() => {
-    fetchTasks();
-  }, []);
+    fetchTasks()
+  }, [])
 
   const handleFilterChange = (key: keyof TaskFilters, value: any) => {
-    setFilters({ ...filters, [key]: value });
-  };
+    setFilters({ ...filters, [key]: value })
+  }
 
   const handleSearch = () => {
-    setFilters({ ...filters, search: searchTerm });
-  };
+    setFilters({ ...filters, search: searchTerm })
+  }
 
   const handleCreateTask = () => {
-    setEditingTask(undefined);
-    setIsDialogOpen(true);
-  };
+    setEditingTask(undefined)
+    setIsDialogOpen(true)
+  }
 
   const handleEditTask = (task: Task) => {
-    setEditingTask(task);
-    setIsDialogOpen(true);
-  };
+    setEditingTask(task)
+    setIsDialogOpen(true)
+  }
 
   const handleDeleteTask = async (taskId: number) => {
     if (confirm('Are you sure you want to delete this task?')) {
       try {
-        await tasksApi.deleteTask(taskId);
-        deleteTask(taskId);
-      } catch (err: any) {
-        console.error('Error deleting task:', err);
-        alert('Failed to delete task: ' + (err.response?.data?.detail || err.message));
+        await tasksApi.deleteTask(taskId)
+        deleteTask(taskId)
+      } catch (err) {
+        console.error('Error deleting task:', err)
+        alert(
+          'Failed to delete task: ' +
+            ((err as any)?.response?.data?.detail || (err as Error)?.message || 'Unknown error'),
+        )
       }
     }
-  };
+  }
 
   const handleFormSubmit = async (data: any) => {
     // try {
-      if (editingTask) {
-        // Update existing task
-        const updatedTask = await tasksApi.updateTask(editingTask.id, {
-          title: data.title,
-          description: data.description,
-          due_date: data.due_date,
-          priority: data.priority,
-          // assigned_to: data.assigned_to ? parseInt(data.assigned_to) : undefined,
-        });
-        updateTask(editingTask.id, updatedTask);
-      } else {
-        // Create new task
-        const newTask = await tasksApi.createTask({
-          title: data.title,
-          description: data.description,
-          due_date: data.due_date,
-          priority: data.priority,
-          // assigned_to: data.assigned_to ? parseInt(data.assigned_to) : 0,
-        });
-        addTask(newTask);
-      }
-      setIsDialogOpen(false);
+    if (editingTask) {
+      // Update existing task
+      const updatedTask = await tasksApi.updateTask(editingTask.id, {
+        title: data.title,
+        description: data.description,
+        due_date: data.due_date,
+        priority: data.priority,
+        // assigned_to: data.assigned_to ? parseInt(data.assigned_to) : undefined,
+      })
+      updateTask(editingTask.id, updatedTask)
+    } else {
+      // Create new task
+      const newTask = await tasksApi.createTask({
+        title: data.title,
+        description: data.description,
+        due_date: data.due_date,
+        priority: data.priority,
+        // assigned_to: data.assigned_to ? parseInt(data.assigned_to) : 0,
+      })
+      addTask(newTask)
+    }
+    setIsDialogOpen(false)
     // } catch (err: any) {
     //   console.error('Error saving task:', err);
     //   alert('Failed to save task: ' + (err.response?.data?.detail || err.message));
     // }
-  };
+  }
 
   const handleFormCancel = () => {
-    setIsDialogOpen(false);
-  };
+    setIsDialogOpen(false)
+  }
 
-  const tasks = filteredTasks();
+  const tasks = filteredTasks()
 
   return (
     <div>
       <div className="flex justify-between items-center mb-6">
         <div>
           <h1 className="text-2xl font-bold">Tasks</h1>
-          {isLoading && <p className="text-sm text-muted-foreground mt-1">Loading tasks...</p>}
+          {isLoading && (
+            <p className="text-sm text-muted-foreground mt-1">
+              Loading tasks...
+            </p>
+          )}
         </div>
         <div className="flex space-x-2">
-          <Button
-            variant="outline"
-            onClick={fetchTasks}
-            disabled={isLoading}
-          >
+          <Button variant="outline" onClick={fetchTasks} disabled={isLoading}>
             {isLoading ? 'Loading...' : 'Refresh'}
           </Button>
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
@@ -163,13 +180,16 @@ function Tasks() {
             <Select
               value={filters.completed?.toString() || 'all'}
               onValueChange={(value) =>
-                handleFilterChange('completed', value === 'all' ? undefined : value === 'true')
+                handleFilterChange(
+                  'completed',
+                  value === 'all' ? undefined : value === 'true',
+                )
               }
             >
               <SelectTrigger>
                 <SelectValue placeholder="Status" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="bg-card">
                 <SelectItem value="all">All Status</SelectItem>
                 <SelectItem value="false">Pending</SelectItem>
                 <SelectItem value="true">Completed</SelectItem>
@@ -179,13 +199,16 @@ function Tasks() {
             <Select
               value={filters.assigned_to?.toString() || 'all'}
               onValueChange={(value) =>
-                handleFilterChange('assigned_to', value === 'all' ? undefined : parseInt(value))
+                handleFilterChange(
+                  'assigned_to',
+                  value === 'all' ? undefined : parseInt(value),
+                )
               }
             >
               <SelectTrigger>
                 <SelectValue placeholder="Assigned To" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className=" bg-card ">
                 <SelectItem value="all">All Users</SelectItem>
                 <SelectItem value="1">User 1</SelectItem>
                 <SelectItem value="2">User 2</SelectItem>
@@ -196,13 +219,16 @@ function Tasks() {
             <Select
               value={filters.priority || 'all'}
               onValueChange={(value) =>
-                handleFilterChange('priority', value === 'all' ? undefined : value)
+                handleFilterChange(
+                  'priority',
+                  value === 'all' ? undefined : value,
+                )
               }
             >
               <SelectTrigger>
                 <SelectValue placeholder="Priority" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className=" bg-card ">
                 <SelectItem value="all">All Priorities</SelectItem>
                 <SelectItem value="high">High</SelectItem>
                 <SelectItem value="medium">Medium</SelectItem>
@@ -212,7 +238,10 @@ function Tasks() {
 
             <Button
               variant="outline"
-              onClick={() => setFilters({})}
+              onClick={() => {
+                setFilters({})
+                setSearchTerm('')
+              }}
             >
               Clear Filters
             </Button>
@@ -268,17 +297,27 @@ function Tasks() {
                       {task.description}
                     </p>
                     <div className="flex items-center space-x-4 mt-2 text-sm">
-                      <span className={`px-2 py-1 rounded-full text-xs ${
-                        task.priority === 'high' ? 'bg-red-100 text-red-800' :
-                        task.priority === 'medium' ? 'bg-yellow-100 text-yellow-800' :
-                        'bg-green-100 text-green-800'
-                      }`}>
+                      <span
+                        className={`px-2 py-1 rounded-full text-xs ${
+                          task.priority === 'high'
+                            ? 'bg-red-100 text-red-800'
+                            : task.priority === 'medium'
+                            ? 'bg-yellow-100 text-yellow-800'
+                            : 'bg-green-100 text-green-800'
+                        }`}
+                      >
                         {task.priority}
                       </span>
-                      <span className={task.completed ? 'text-green-600' : 'text-yellow-600'}>
+                      <span
+                        className={
+                          task.completed ? 'text-green-600' : 'text-yellow-600'
+                        }
+                      >
                         {task.completed ? 'Completed' : 'Pending'}
                       </span>
-                      <span>Due: {new Date(task.due_date).toLocaleDateString()}</span>
+                      <span>
+                        Due: {new Date(task.due_date).toLocaleDateString()}
+                      </span>
                     </div>
                   </div>
                   <div className="flex space-x-2">
@@ -309,7 +348,7 @@ function Tasks() {
         )}
       </div>
     </div>
-  );
+  )
 }
 
-export default Tasks;
+export default Tasks

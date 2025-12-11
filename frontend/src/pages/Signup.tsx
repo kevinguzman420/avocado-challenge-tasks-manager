@@ -1,45 +1,59 @@
-import { useState, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
-import { Button } from '../components/ui/button';
-import { Input } from '../components/ui/input';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
-import { Alert, AlertDescription } from '../components/ui/alert';
-import { ThemeToggle } from '../components/ThemeToggle';
-import { useAuthStore } from '../stores/authStore';
-import { authApi } from '../api/auth';
-import { Loader2, Eye, EyeOff } from 'lucide-react';
+import { useState, useEffect } from 'react'
+import { useNavigate, Link } from 'react-router-dom'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import * as z from 'zod'
+import { Button } from '../components/ui/button'
+import { Input } from '../components/ui/input'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '../components/ui/card'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '../components/ui/select'
+import { Alert, AlertDescription, AlertTitle } from '../components/ui/alert'
+import { ThemeToggle } from '../components/ThemeToggle'
+import { useAuthStore } from '../stores/authStore'
+import { authApi } from '../api/auth'
+import { Loader2, Eye, EyeOff, AlertCircleIcon } from 'lucide-react'
 
-const signupSchema = z.object({
-  email: z.string().email('Invalid email address'),
-  full_name: z.string().min(2, 'Full name must be at least 2 characters'),
-  password: z.string().min(6, 'Password must be at least 6 characters'),
-  confirmPassword: z.string(),
-  role: z.enum(['regular', 'admin']),
-}).refine((data) => data.password === data.confirmPassword, {
-  message: "Passwords don't match",
-  path: ["confirmPassword"],
-});
+const signupSchema = z
+  .object({
+    email: z.string().email('Invalid email address'),
+    full_name: z.string().min(2, 'Full name must be at least 2 characters'),
+    password: z.string().min(6, 'Password must be at least 6 characters'),
+    confirmPassword: z.string(),
+    role: z.enum(['regular', 'admin']),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords don't match",
+    path: ['confirmPassword'],
+  })
 
-type SignupFormData = z.infer<typeof signupSchema>;
+type SignupFormData = z.infer<typeof signupSchema>
 
 function Signup() {
-  const navigate = useNavigate();
-  const { isAuthenticated } = useAuthStore();
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const navigate = useNavigate()
+  const { isAuthenticated } = useAuthStore()
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [showPassword, setShowPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
 
   useEffect(() => {
     // Redirect to dashboard if user is already authenticated
     if (isAuthenticated) {
-      navigate('/', { replace: true });
+      navigate('/', { replace: true })
     }
-  }, [isAuthenticated, navigate]);
+  }, [isAuthenticated, navigate])
 
   const {
     register,
@@ -52,13 +66,13 @@ function Signup() {
     defaultValues: {
       role: 'regular',
     },
-  });
+  })
 
-  const role = watch('role');
+  const role = watch('role')
 
   const onSubmit = async (data: SignupFormData) => {
-    setIsLoading(true);
-    setError(null);
+    setIsLoading(true)
+    setError(null)
 
     try {
       await authApi.register({
@@ -66,14 +80,18 @@ function Signup() {
         full_name: data.full_name,
         password: data.password,
         role: data.role,
-      });
-      navigate('/login', { state: { message: 'Account created successfully! Please sign in.' } });
-    } catch (err: any) {
-      setError(err.response?.data?.detail || 'Registration failed. Please try again.');
+      })
+      navigate('/login', {
+        state: { message: 'Account created successfully! Please sign in.' },
+      })
+    } catch (err) {
+      setError(
+        (err as any)?.response?.data?.detail || 'Registration failed. Please try again.',
+      )
     } finally {
-      setIsLoading(false);
+      setIsLoading(false)
     }
-  };
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background px-4 relative">
@@ -123,7 +141,9 @@ function Signup() {
                 disabled={isLoading}
               />
               {errors.full_name && (
-                <p className="text-sm text-red-600">{errors.full_name.message}</p>
+                <p className="text-sm text-red-600">
+                  {errors.full_name.message}
+                </p>
               )}
             </div>
 
@@ -133,17 +153,31 @@ function Signup() {
               </label>
               <Select
                 value={role}
-                onValueChange={(value) => setValue('role', value as 'regular' | 'admin')}
+                onValueChange={(value) =>
+                  setValue('role', value as 'regular' | 'admin')
+                }
                 disabled={isLoading}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Select your role" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className=" bg-card ">
                   <SelectItem value="regular">Regular User</SelectItem>
                   <SelectItem value="admin">Administrator</SelectItem>
                 </SelectContent>
               </Select>
+              <Alert variant="destructive">
+                <AlertTitle className="text-sm font-medium">
+                  Advertencia: Sobre el Role
+                </AlertTitle>
+                <AlertDescription className="flex justify-between">
+                  <AlertCircleIcon className="inline mr-1 mb-1 h-6 w-6" />
+                  <span>
+                    únicamente con propósitos de facilitar la prueba (nunca
+                    dejar que el usuario elija su rol real)
+                  </span>
+                </AlertDescription>
+              </Alert>
               {errors.role && (
                 <p className="text-sm text-red-600">{errors.role.message}</p>
               )}
@@ -177,7 +211,9 @@ function Signup() {
                 </Button>
               </div>
               {errors.password && (
-                <p className="text-sm text-red-600">{errors.password.message}</p>
+                <p className="text-sm text-red-600">
+                  {errors.password.message}
+                </p>
               )}
             </div>
 
@@ -209,7 +245,9 @@ function Signup() {
                 </Button>
               </div>
               {errors.confirmPassword && (
-                <p className="text-sm text-red-600">{errors.confirmPassword.message}</p>
+                <p className="text-sm text-red-600">
+                  {errors.confirmPassword.message}
+                </p>
               )}
             </div>
 
@@ -228,7 +266,7 @@ function Signup() {
         </CardContent>
       </Card>
     </div>
-  );
+  )
 }
 
-export default Signup;
+export default Signup
