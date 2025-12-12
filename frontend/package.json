@@ -7,7 +7,9 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "cy:open": "cypress open",
+    "cy:run": "cypress run"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
@@ -46,6 +48,7 @@
     "tailwindcss-animate": "^1.0.7",
     "typescript": "~5.9.3",
     "typescript-eslint": "^8.46.4",
-    "vite": "^7.2.4"
+    "vite": "^7.2.4",
+    "cypress": "^13.6.0"
   }
 }

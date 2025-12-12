@@ -1,9 +1,10 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
-import { Suspense, lazy } from 'react';
+import { Suspense, lazy, useEffect } from 'react';
 import { Layout } from './components/Layout';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { RoleProtectedRoute } from './components/RoleProtectedRoute';
 import { useAuthStore } from './stores/authStore';
+import { useUiStore } from './stores/uiStore';
 
 // Lazy load pages
 const Dashboard = lazy(() => import('./pages/Dashboard'));
@@ -33,6 +34,14 @@ function StatsRoute() {
 }
 
 function App() {
+  const { theme } = useUiStore();
+
+  useEffect(() => {
+    const root = window.document.documentElement;
+    root.classList.remove('light', 'dark');
+    root.classList.add(theme);
+  }, [theme]);
+
   return (
     <Suspense fallback={<LoadingSpinner />}>
       <Routes>

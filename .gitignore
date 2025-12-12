@@ -46,6 +46,7 @@ frontend/.next/           # si algún día usas Next.js
 frontend/.cache/
 frontend/coverage/
 frontend/.cypress/
+frontend/.pnpm-store/ # Ignorar el store de pnpm
 
 # Archivos de IDE y sistema
 .idea/

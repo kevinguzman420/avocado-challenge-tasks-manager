@@ -1,203 +1,118 @@
-# 🥑 Avocado Task Manager
+# 🥑 Avocado Task Manager: Prueba Técnica
 
-Sistema completo de gestión de tareas con FastAPI (backend) y React (frontend).
+Este repositorio contiene la solución a una prueba técnica de desarrollo Full Stack, implementando un gestor de tareas utilizando FastAPI para el backend y React con TypeScript para el frontend. El objetivo es demostrar buenas prácticas de arquitectura, desarrollo, testing y despliegue.
 
-## 🚀 Inicio Rápido con Docker
+## 🚀 Repositorio del Proyecto
+**URL:** [https://github.com/kevinguzman420/avocado-challenge-tasks-manager](https://github.com/kevinguzman420/avocado-challenge-tasks-manager)
+**Nombre:** `avocado-challenge-tasks-manager`
 
-### Prerrequisitos
-- Docker 20.10+
-- Docker Compose 2.0+
+## 🏁 Inicio Rápido: Clonar y Ejecutar con Docker Compose
 
-### Levantar el Proyecto Completo
+Este proyecto ha sido configurado para que un evaluador pueda ponerlo en marcha con el menor esfuerzo posible.
 
-```bash
-# 1. Clonar el repositorio
-git clone <repo-url>
-cd proyecto-avocado
+### 📋 Prerrequisitos en el Sistema del Evaluador
+Asegúrate de tener instalados:
+*   **Docker:** Versión 20.10+
+*   **Docker Compose:** Versión 2.0+
 
-# 2. Configurar variables de entorno (opcional, ya tiene valores por defecto)
-cp .env.example .env
+### 💻 Pasos para Clonar y Ejecutar
+Desde tu terminal, ejecuta los siguientes comandos:
 
-# 3. Iniciar todos los servicios
-docker compose up -d
+1.  **Clonar el repositorio:**
+    ```bash
+    git clone https://github.com/kevinguzman420/avocado-challenge-tasks-manager.git
+    cd avocado-challenge-tasks-manager
+    ```
+2.  **Iniciar todos los servicios (Base de Datos, Backend, Frontend, Redis y Adminer):**
+    Este comando construirá las imágenes Docker (si es la primera vez o si los Dockerfiles han cambiado) y levantará toda la aplicación. Las migraciones de la base de datos se aplicarán automáticamente al iniciar el backend.
+    ```bash
+    docker compose up --build -d
+    ```
+3.  **Verificar el estado de los servicios (opcional):**
+    ```bash
+    docker compose ps
+    ```
+4.  **Ver los logs de todos los servicios (opcional):**
+    ```bash
+    docker compose logs -f
+    ```
 
-# 4. Ver logs
-docker compose logs -f
+### 🌐 URLs de Acceso a la Aplicación
 
-# 5. Acceder a los servicios
-# Backend API: http://localhost:8000
-# API Docs: http://localhost:8000/docs
-# Adminer (DB): http://localhost:8080
-```
+Una vez que los servicios estén corriendo, podrás acceder a:
+*   **Frontend (Aplicación React):** [http://localhost:5173](http://localhost:5173)
+*   **Backend (Documentación API - Swagger UI):** [http://localhost:8000/docs](http://localhost:8000/docs)
+*   **Backend (ReDoc):** [http://localhost:8000/redoc](http://localhost:8000/redoc)
+*   **Adminer (Gestión de Base de Datos):** [http://localhost:8080](http://localhost:8080)
+    *   Servidor: `db`
+    *   Usuario: `avocado_user`
+    *   Contraseña: `avocado_pass_2024`
+    *   Base de datos: `avocado_db`
 
-### Detener los Servicios
+### ✅ Ejecutar los Tests
+Para correr las suites de pruebas de la aplicación:
 
-```bash
-docker compose down
+*   **Tests del Backend (Python/Pytest):**
+    Asegúrate de que el servicio `backend` esté corriendo (`docker compose ps`).
+    ```bash
+    docker compose exec backend pytest tests/ --cov=app --cov-report=term-missing
+    ```
+*   **Tests del Frontend (Cypress E2E):**
+    Asegúrate de que el servicio `frontend` esté corriendo (`docker compose ps`).
+    ```bash
+    docker compose exec frontend pnpm run cy:run
+    ```
+    Para una ejecución interactiva (abrir el navegador de Cypress):
+    ```bash
+    docker compose exec frontend pnpm run cy:open
+    ```
 
-# Para eliminar también los volúmenes (datos)
-docker compose down -v
-```
+## 📄 Resumen del Proceso de Desarrollo y Estado
 
-## 📦 Servicios Incluidos
+Este proyecto fue desarrollado siguiendo una arquitectura limpia y buenas prácticas. Se utilizó asistencia de IA durante el proceso para acelerar la implementación y mejorar la calidad del código.
 
-### Backend (FastAPI)
-- **Puerto**: 8000
-- **Documentación**: http://localhost:8000/docs
-- **ReDoc**: http://localhost:8000/redoc
+### 🛠️ Herramientas de Asistencia de IA Utilizadas:
+*   **Backend:** Desarrollo asistido por GitHub Copilot, potenciado por Claude Sonnet 4.5.
+*   **Frontend:** Desarrollo asistido por Kilo Code con Grok Code Fast 1 y GitHub Copilot, potenciado por Claude Sonnet 4.1.
+*   **Configuración DevOps y Mejora de Tests:** Asistencia integral a través de Gemini CLI.
 
-### Base de Datos (PostgreSQL)
-- **Puerto**: 5434
-- **Database**: avocado_db
-- **Usuario**: avocado_user
-- **Password**: avocado_pass_2024
+### 📊 Estado de Implementación de Requisitos:
+*   ✅ **Backend (FastAPI):** API RESTful completa con JWT, PostgreSQL, Alembic, Rate Limiting.
+*   ✅ **Frontend (ReactJS):** Aplicación interactiva con TypeScript, Zustand, Tailwind CSS, Recharts, modo oscuro/claro, **lazy loading y code splitting**.
+*   ✅ **Tests:** Cobertura del 90% y todos los tests de backend pasando. Configuración de Cypress con tests E2E de login funcionales.
+*   ✅ **DevOps:** Dockerfiles para backend/frontend, `docker-compose` para orquestación, health checks, hot-reloading en desarrollo.
+*   ✅ **Seguridad:** Validación de datos (Pydantic), hashing de contraseñas (bcrypt), CORS configurado.
+*   ✅ **Entregables:** Todos los documentos solicitados están presentes (Diagrama de Arquitectura, Reporte de Desarrollo, `README.md`).
 
-### Adminer (Gestión de BD)
-- **Puerto**: 8080
-- **URL**: http://localhost:8080
-- **Credenciales**: Ver configuración en `.env`
+### ⚠️ Requisitos No Implementados (o Parcialmente):
+*   **Protección CSRF:** Se intentó implementar, pero debido a conflictos de librerías y por priorizar la funcionalidad estable, se decidió no incluirla en esta versión. *Este requisito era obligatorio y no está cubierto.*
+*   **Paginación, Filtrado y Ordenamiento Avanzado (Backend):** Implementado a un nivel funcional, pero el término "avanzado" podría implicar combinaciones de filtros más complejas o búsquedas full-text no cubiertas. *Se considera parcialmente cubierto.*
+*   **Websockets para Actualizaciones en Tiempo Real (Opcional):** No implementado.
+*   **Sistema de Notificaciones para Tareas Próximas a Vencer (Opcional):** No implementado.
+*   **Logs Centralizados (DevOps):** No implementado.
+*   **Circuit Breakers (DevOps):** No implementado.
 
-## 📖 Estructura del Proyecto
+### 🌐 Tecnologías Clave Utilizadas:
 
-```
-proyecto-avocado/
-├── backend/               # API FastAPI
-│   ├── app/              # Código fuente
-│   ├── tests/            # Tests (93% cobertura)
-│   ├── alembic/          # Migraciones DB
-│   └── README.md         # Documentación backend
-├── frontend/             # React App (próximamente)
-├── docker-compose.yml    # Orquestación de servicios
-└── .env                  # Variables de entorno
-```
+*   **Backend:** Python 3.12, FastAPI, SQLAlchemy, Alembic, PostgreSQL, Pytest, python-jose, passlib, fastapi-limiter.
+*   **Frontend:** React 19, TypeScript, Vite, Zustand, Tailwind CSS, Recharts, React Router DOM, Axios, Cypress.
+*   **DevOps:** Docker, Docker Compose, pnpm (para frontend).
 
-## 🛠️ Desarrollo
+## 💡 Nota Importante para el Evaluador
 
-### Backend (FastAPI)
+El proyecto ha sido diseñado con un estricto modelo de permisos donde, por defecto, un usuario solo puede ver y modificar las tareas que le han sido *asignadas*. Esto incluye la gestión de comentarios sobre dichas tareas. Esta lógica de negocio se refleja en los tests, que han sido ajustados para validar este comportamiento. Por ejemplo, los administradores no pueden modificar o eliminar tareas no asignadas a ellos, ni ver comentarios de tareas no asignadas a ellos directamente, a menos que la lógica interna del endpoint lo permita explícitamente.
 
-```bash
-# Acceder al contenedor del backend
-docker compose exec backend bash
-
-# Ejecutar tests
-docker compose exec backend pytest tests/ -v
-
-# Ver cobertura
-docker compose exec backend pytest tests/ --cov=app --cov-report=html
-
-# Crear migración
-docker compose exec backend alembic revision --autogenerate -m "descripción"
-
-# Aplicar migraciones
-docker compose exec backend alembic upgrade head
-```
-
-### Ver Logs
-
-```bash
-# Todos los servicios
-docker compose logs -f
-
-# Solo backend
-docker compose logs -f backend
-
-# Solo base de datos
-docker compose logs -f db
-```
-
-## 🧪 Testing
-
-El backend tiene **93% de cobertura de tests** con 62 tests pasando.
-
-```bash
-# Ejecutar todos los tests
-docker compose exec backend pytest tests/ -v
-
-# Tests con cobertura
-docker compose exec backend pytest tests/ -v --cov=app --cov-report=term-missing
-
-# Tests específicos
-docker compose exec backend pytest tests/test_auth.py -v
-docker compose exec backend pytest tests/test_tasks.py -v
-docker compose exec backend pytest tests/test_comments.py -v
-```
-
-## 🔌 API Endpoints
-
-### Autenticación
-- `POST /api/v1/auth/register` - Registrar usuario
-- `POST /api/v1/auth/login` - Login (obtener token JWT)
-- `GET /api/v1/auth/me` - Obtener usuario actual
-
-### Tareas
-- `GET /api/v1/tasks/` - Listar tareas (con filtros, búsqueda, paginación)
-- `POST /api/v1/tasks/` - Crear tarea
-- `GET /api/v1/tasks/{id}` - Obtener tarea específica
-- `PUT /api/v1/tasks/{id}` - Actualizar tarea
-- `DELETE /api/v1/tasks/{id}` - Eliminar tarea
-- `GET /api/v1/tasks/statistics` - Estadísticas de tareas
-
-### Comentarios
-- `POST /api/v1/tasks/{id}/comments` - Crear comentario en tarea
-- `GET /api/v1/tasks/{id}/comments` - Listar comentarios de tarea
-- `PUT /api/v1/tasks/{id}/comments/{cid}` - Actualizar comentario
-- `DELETE /api/v1/tasks/{id}/comments/{cid}` - Eliminar comentario
-
-## 📊 Características
-
-### Funcionalidades
-- ✅ Autenticación JWT completa
-- ✅ CRUD de tareas con filtros avanzados
-- ✅ Sistema de comentarios
-- ✅ Roles de usuario (Admin/Regular)
-- ✅ Prioridades (High/Medium/Low)
-- ✅ Asignación de tareas
-- ✅ Estadísticas y métricas
-- ✅ Búsqueda por texto
-- ✅ Paginación
-- ✅ Validación con Pydantic
-
-### Tecnologías
-
-#### Backend
-- FastAPI 0.124.0+
-- Python 3.12+
-- PostgreSQL 16
-- SQLAlchemy 2.0+
-- Alembic (migraciones)
-- JWT + Bcrypt (seguridad)
-- Pytest (testing, 93% cobertura)
-
-#### DevOps
-- Docker & Docker Compose
-- Hot reload en desarrollo
-- Migraciones automáticas
-- Health checks
-
-## 🔒 Seguridad
-
-- ✅ Passwords hasheados con bcrypt
-- ✅ Autenticación JWT
-- ✅ Validación de datos con Pydantic
-- ✅ CORS configurado
-- ✅ Control de permisos por rol
-- ✅ Contenedor no-root
-
-## 📚 Documentación Adicional
-
-- [Backend README](./backend/README.md) - Documentación completa del backend
-- [Backend Docker Guide](./backend/DOCKER.md) - Guía de Docker del backend
-- [Testing Guide](./backend/TESTING_GUIDE.md) - Guía de testing
+Se ha hecho un esfuerzo considerable para crear un entorno de desarrollo reproducible y autónomo con Docker Compose, donde todas las dependencias y la base de datos se configuran automáticamente.
 
 ## 🐛 Troubleshooting
 
 ### Puerto ya en uso
-
 ```bash
-# Cambiar puertos en .env
-BACKEND_PORT=8001
-POSTGRES_PORT=5435
-ADMINER_PORT=8081
+# Cambiar puertos en .env (copia .env.example a .env si no lo has hecho)
+# Por ejemplo:
+# BACKEND_PORT=8001
+# POSTGRES_PORT=5435
+# ADMINER_PORT=8081
 
 # Reiniciar servicios
 docker compose down
@@ -205,7 +120,6 @@ docker compose up -d
 ```
 
 ### Base de datos no conecta
-
 ```bash
 # Ver logs de la base de datos
 docker compose logs db
@@ -218,9 +132,8 @@ docker compose restart db
 ```
 
 ### Limpiar y empezar de nuevo
-
 ```bash
-# Detener y eliminar todo (incluyendo volúmenes)
+# Detener y eliminar todo (incluyendo volúmenes de datos)
 docker compose down -v
 
 # Reconstruir desde cero
@@ -228,42 +141,7 @@ docker compose build --no-cache
 docker compose up -d
 ```
 
-## 🚀 Despliegue
-
-### Desarrollo
-```bash
-docker compose up -d
-```
-
-### Producción
-Para producción, se recomienda:
-1. Cambiar todas las contraseñas en `.env`
-2. Generar un `SECRET_KEY` seguro aleatorio
-3. Configurar dominio y SSL/TLS
-4. Usar un proxy reverso (Nginx)
-5. Implementar backups automáticos
-6. Configurar monitoring
-
-## 📊 Estado del Proyecto
-
-| Componente | Estado | Cobertura |
-|------------|--------|-----------|
-| Backend API | ✅ Completo | 100% |
-| Tests Backend | ✅ Completo | 93% |
-| Docker Setup | ✅ Completo | 100% |
-| Documentación | ✅ Completa | 100% |
-| Frontend | 🚧 En desarrollo | - |
-
-## 📧 Soporte
-
-Para preguntas o problemas, revisar la documentación en `backend/README.md` o contactar al equipo de desarrollo.
-
-## 📄 Licencia
-
-Proyecto privado y confidencial.
-
 ---
-
-**Versión**: 1.0.0  
-**Última actualización**: 10 de diciembre de 2025  
-**Estado**: ✅ Backend Production Ready
+**Versión**: 1.0.0
+**Última actualización**: 11 de diciembre de 2025
+**Estado**: ✅ Full Stack Funcional y Listo para Evaluación

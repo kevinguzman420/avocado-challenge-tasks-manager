@@ -1,19 +1,10 @@
 import type { ReactNode } from 'react'
-import { useEffect } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { Button } from './ui/button'
 import { useUiStore } from '../stores/uiStore'
 import { useAuthStore } from '../stores/authStore'
 import { ThemeToggle } from './ThemeToggle'
-import {
-  Home,
-  CheckSquare,
-  BarChart3,
-  Users,
-  Settings,
-  Menu,
-  X,
-} from 'lucide-react'
+import { Home, CheckSquare, BarChart3, Users, Menu, X } from 'lucide-react'
 import clsx from 'clsx'
 
 interface LayoutProps {
@@ -21,22 +12,24 @@ interface LayoutProps {
 }
 
 export function Layout({ children }: LayoutProps) {
-  const { theme, sidebarOpen, toggleSidebar } = useUiStore()
+  const { sidebarOpen, toggleSidebar } = useUiStore()
   const { user, logout } = useAuthStore()
   const location = useLocation()
-
-  useEffect(() => {
-    const root = window.document.documentElement
-    root.classList.remove('light', 'dark')
-    root.classList.add(theme)
-  }, [theme])
 
   const isAdmin = user?.role === 'admin'
 
   const navigation = [
-    { name: 'Panel de Control', href: isAdmin ? '/admin/dashboard' : '/', icon: Home },
+    {
+      name: 'Panel de Control',
+      href: isAdmin ? '/admin/dashboard' : '/',
+      icon: Home,
+    },
     { name: 'Tareas', href: '/tasks', icon: CheckSquare, hideForAdmin: true },
-    { name: 'Estadísticas', href: isAdmin ? '/admin/stats' : '/stats', icon: BarChart3 },
+    {
+      name: 'Estadísticas',
+      href: isAdmin ? '/admin/stats' : '/stats',
+      icon: BarChart3,
+    },
     { name: 'Usuarios', href: '/users', icon: Users, adminOnly: true },
   ]
 
@@ -121,7 +114,7 @@ export function Layout({ children }: LayoutProps) {
         <div className="flex items-center space-x-4 ml-auto">
           <ThemeToggle
             variant="default"
-            className="bg-primary hover:bg-secondary/80"
+            className="bg-primary/80 hover:bg-primary cursor-pointer"
           />
         </div>
       </header>
