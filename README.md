@@ -18,13 +18,14 @@ cd proyecto-avocado
 # 2. Configurar variables de entorno (opcional, ya tiene valores por defecto)
 cp .env.example .env
 
-# 3. Iniciar todos los servicios
-docker compose up -d
+# 3. Iniciar todos los servicios (construirá las imágenes si es necesario)
+docker compose up --build -d
 
 # 4. Ver logs
 docker compose logs -f
 
 # 5. Acceder a los servicios
+# Frontend App: http://localhost:5173
 # Backend API: http://localhost:8000
 # API Docs: http://localhost:8000/docs
 # Adminer (DB): http://localhost:8080
@@ -46,6 +47,10 @@ docker compose down -v
 - **Documentación**: http://localhost:8000/docs
 - **ReDoc**: http://localhost:8000/redoc
 
+### Frontend (React + Vite)
+- **Puerto**: 5173
+- **URL**: http://localhost:5173
+
 ### Base de Datos (PostgreSQL)
 - **Puerto**: 5434
 - **Database**: avocado_db
@@ -63,11 +68,17 @@ docker compose down -v
 proyecto-avocado/
 ├── backend/               # API FastAPI
 │   ├── app/              # Código fuente
-│   ├── tests/            # Tests (93% cobertura)
+│   ├── tests/            # Tests
 │   ├── alembic/          # Migraciones DB
+│   ├── Dockerfile.dev    # Dockerfile para desarrollo
 │   └── README.md         # Documentación backend
-├── frontend/             # React App (próximamente)
+├── frontend/             # React App
+│   ├── src/              # Código fuente
+│   ├── Dockerfile.dev    # Dockerfile para desarrollo
+│   └── package.json      # Dependencias y scripts
+├── avocado_task_manager_architecture.png # Diagrama de arquitectura
 ├── docker-compose.yml    # Orquestación de servicios
+├── REPORTE.md            # Reporte del proceso de desarrollo
 └── .env                  # Variables de entorno
 ```
 
@@ -89,7 +100,22 @@ docker compose exec backend pytest tests/ --cov=app --cov-report=html
 docker compose exec backend alembic revision --autogenerate -m "descripción"
 
 # Aplicar migraciones
-docker compose exec backend alembic upgrade head
+docker compose exec backend alemetic upgrade head
+```
+
+### Frontend (React + Vite)
+
+El frontend soporta Hot Module Replacement (HMR). Cualquier cambio en los archivos fuente se reflejará automáticamente en el navegador.
+
+```bash
+# Acceder al contenedor del frontend
+docker compose exec frontend bash
+
+# Instalar dependencias (si no se hizo en la construcción)
+# pnpm install
+
+# Correr tests (si se implementan)
+# pnpm run test
 ```
 
 ### Ver Logs
@@ -100,6 +126,9 @@ docker compose logs -f
 
 # Solo backend
 docker compose logs -f backend
+
+# Solo frontend
+docker compose logs -f frontend
 
 # Solo base de datos
 docker compose logs -f db
@@ -168,6 +197,14 @@ docker compose exec backend pytest tests/test_comments.py -v
 - JWT + Bcrypt (seguridad)
 - Pytest (testing, 93% cobertura)
 
+#### Frontend
+- React 19+
+- TypeScript
+- Vite
+- Zustand (gestión de estado)
+- Tailwind CSS (estilos)
+- Recharts (gráficos)
+
 #### DevOps
 - Docker & Docker Compose
 - Hot reload en desarrollo
@@ -188,6 +225,8 @@ docker compose exec backend pytest tests/test_comments.py -v
 - [Backend README](./backend/README.md) - Documentación completa del backend
 - [Backend Docker Guide](./backend/DOCKER.md) - Guía de Docker del backend
 - [Testing Guide](./backend/TESTING_GUIDE.md) - Guía de testing
+- [Reporte del Proceso de Desarrollo](./REPORTE.md) - Detalle del enfoque y herramientas
+- [Diagrama de Arquitectura](./avocado_task_manager_architecture.png) - Visión general del sistema
 
 ## 🐛 Troubleshooting
 
@@ -232,7 +271,7 @@ docker compose up -d
 
 ### Desarrollo
 ```bash
-docker compose up -d
+docker compose up --build -d
 ```
 
 ### Producción
@@ -252,7 +291,8 @@ Para producción, se recomienda:
 | Tests Backend | ✅ Completo | 93% |
 | Docker Setup | ✅ Completo | 100% |
 | Documentación | ✅ Completa | 100% |
-| Frontend | 🚧 En desarrollo | - |
+| Frontend | ✅ Funcional | - |
+| DevOps | ✅ Completo | - |
 
 ## 📧 Soporte
 
@@ -264,6 +304,6 @@ Proyecto privado y confidencial.
 
 ---
 
-**Versión**: 1.0.0  
-**Última actualización**: 10 de diciembre de 2025  
+**Versión**: 1.0.0
+**Última actualización**: 10 de diciembre de 2025
 **Estado**: ✅ Backend Production Ready

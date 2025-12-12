@@ -1,44 +1,50 @@
-import { useState, useEffect } from 'react';
-import { useNavigate, Link, useLocation } from 'react-router-dom';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
-import { Button } from '../components/ui/button';
-import { Input } from '../components/ui/input';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
-import { Alert, AlertDescription } from '../components/ui/alert';
-import { ThemeToggle } from '../components/ThemeToggle';
-import { useAuthStore } from '../stores/authStore';
-import { authApi } from '../api/auth';
-import { Loader2, Eye, EyeOff } from 'lucide-react';
+import { useState, useEffect } from 'react'
+import { useNavigate, Link, useLocation } from 'react-router-dom'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import * as z from 'zod'
+import { Button } from '../components/ui/button'
+import { Input } from '../components/ui/input'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '../components/ui/card'
+import { Alert, AlertDescription } from '../components/ui/alert'
+import { ThemeToggle } from '../components/ThemeToggle'
+import { useAuthStore } from '../stores/authStore'
+import { authApi } from '../api/auth'
+import { Loader2, Eye, EyeOff } from 'lucide-react'
 
 const loginSchema = z.object({
   email: z.string().email('Dirección de correo electrónico inválida'),
   password: z.string().min(1, 'La contraseña es requerida'),
-});
+})
 
-type LoginFormData = z.infer<typeof loginSchema>;
+type LoginFormData = z.infer<typeof loginSchema>
 
 function Login() {
-  const navigate = useNavigate();
-  const location = useLocation();
-  const { login, isAuthenticated } = useAuthStore();
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
-  const [showPassword, setShowPassword] = useState(false);
+  const navigate = useNavigate()
+  const location = useLocation()
+  const { login, isAuthenticated } = useAuthStore()
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [successMessage, setSuccessMessage] = useState<string | null>(null)
+  const [showPassword, setShowPassword] = useState(false)
 
   useEffect(() => {
     // Redirect to dashboard if user is already authenticated
     if (isAuthenticated) {
-      navigate('/', { replace: true });
-      return;
+      navigate('/', { replace: true })
+      return
     }
 
     if (location.state?.message) {
-      setSuccessMessage(location.state.message);
+      setSuccessMessage(location.state.message)
     }
-  }, [isAuthenticated, navigate, location.state]);
+  }, [isAuthenticated, navigate, location.state])
 
   const {
     register,
@@ -46,15 +52,15 @@ function Login() {
     formState: { errors },
   } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
-  });
+  })
 
   const onSubmit = async (data: LoginFormData) => {
-    setIsLoading(true);
-    setError(null);
+    setIsLoading(true)
+    setError(null)
 
     try {
-      const response = await authApi.login(data.email, data.password);
-      
+      const response = await authApi.login(data.email, data.password)
+
       // Mapear los datos del usuario del backend al formato del store
       const user = {
         id: response.user.id,
@@ -63,16 +69,19 @@ function Login() {
         full_name: response.user.full_name,
         role: response.user.role,
         is_active: response.user.is_active,
-      };
-      
-      login(user, response.access_token);
-      navigate('/');
-    } catch (err: any) {
-      setError(err.response?.data?.detail || 'Inicio de sesión fallido. Por favor verifica tus credenciales.');
+      }
+
+      login(user, response.access_token)
+      navigate('/')
+    } catch (err) {
+      setError(
+        (err as any).response?.data?.detail ||
+          'Inicio de sesión fallido. Por favor verifica tus credenciales.',
+      )
     } finally {
-      setIsLoading(false);
+      setIsLoading(false)
     }
-  };
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background px-4 relative">
@@ -81,9 +90,16 @@ function Login() {
       </div>
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl text-center">Iniciar Sesión</CardTitle>
+          <img
+            src="/avocado-logo.webp"
+            alt="Avocado Logo"
+            className="h-12 w-auto mx-auto mb-2"
+          />
+          <CardTitle className="text-2xl text-center">
+            Bienvenido de nuevo
+          </CardTitle>
           <CardDescription className="text-center">
-            Ingresa tu correo electrónico y contraseña para acceder a tu cuenta
+            Por favor ingresa tus datos para acceder a tu cuenta
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -144,7 +160,9 @@ function Login() {
                 </Button>
               </div>
               {errors.password && (
-                <p className="text-sm text-red-600">{errors.password.message}</p>
+                <p className="text-sm text-red-600">
+                  {errors.password.message}
+                </p>
               )}
             </div>
 
@@ -163,7 +181,7 @@ function Login() {
         </CardContent>
       </Card>
     </div>
-  );
+  )
 }
 
-export default Login;
+export default Login

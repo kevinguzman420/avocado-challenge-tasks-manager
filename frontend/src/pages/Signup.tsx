@@ -28,13 +28,17 @@ import { Loader2, Eye, EyeOff, AlertCircleIcon } from 'lucide-react'
 const signupSchema = z
   .object({
     email: z.string().email('Dirección de correo electrónico inválida'),
-    full_name: z.string().min(2, 'El nombre completo debe tener al menos 2 caracteres'),
-    password: z.string().min(6, 'La contraseña debe tener al menos 6 caracteres'),
+    full_name: z
+      .string()
+      .min(2, 'El nombre completo debe tener al menos 2 caracteres'),
+    password: z
+      .string()
+      .min(6, 'La contraseña debe tener al menos 6 caracteres'),
     confirmPassword: z.string(),
     role: z.enum(['regular', 'admin']),
   })
   .refine((data) => data.password === data.confirmPassword, {
-    message: "Las contraseñas no coinciden",
+    message: 'Las contraseñas no coinciden',
     path: ['confirmPassword'],
   })
 
@@ -82,11 +86,14 @@ function Signup() {
         role: data.role,
       })
       navigate('/login', {
-        state: { message: '¡Cuenta creada exitosamente! Por favor inicia sesión.' },
+        state: {
+          message: '¡Cuenta creada exitosamente! Por favor inicia sesión.',
+        },
       })
     } catch (err) {
       setError(
-        (err as any)?.response?.data?.detail || 'Registro fallido. Por favor inténtalo de nuevo.',
+        (err as any)?.response?.data?.detail ||
+          'Registro fallido. Por favor inténtalo de nuevo.',
       )
     } finally {
       setIsLoading(false)
@@ -94,12 +101,17 @@ function Signup() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background px-4 relative">
+    <div className="min-h-screen flex items-center justify-center bg-background px-4 relative overflow-y-auto">
       <div className="absolute top-4 right-4">
         <ThemeToggle />
       </div>
-      <Card className="w-full max-w-md">
+      <Card className="w-full max-w-md my-12 ">
         <CardHeader className="space-y-1">
+          <img
+            src="/avocado-logo.webp"
+            alt="Avocado Logo"
+            className="h-12 w-auto mx-auto mb-2"
+          />
           <CardTitle className="text-2xl text-center">Crear Cuenta</CardTitle>
           <CardDescription className="text-center">
             Ingresa tu información para crear tu cuenta
@@ -167,14 +179,15 @@ function Signup() {
                 </SelectContent>
               </Select>
               <Alert variant="destructive">
+                <AlertCircleIcon className="inline mr-1 mb-1 h-6 w-6" />
                 <AlertTitle className="text-sm font-medium">
                   Advertencia: Sobre el Rol
                 </AlertTitle>
                 <AlertDescription className="flex justify-between">
-                  <AlertCircleIcon className="inline mr-1 mb-1 h-6 w-6" />
                   <span>
-                    únicamente con propósitos de facilitar la prueba (nunca
-                    dejar que el usuario elija su rol real)
+                    Únicamente con propósitos de facilitar la prueba (Según el
+                    modelo de negocio, nunca dejar que el usuario elija su
+                    propio rol).
                   </span>
                 </AlertDescription>
               </Alert>
