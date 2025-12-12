@@ -42,15 +42,25 @@ export function Layout({ children }: LayoutProps) {
   })
 
   return (
-    <div className=" container min-h-screen bg-background">
+    <div className="flex min-h-screen bg-background">
+      {/* Mobile overlay */}
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 z-40 bg-black/50 lg:hidden"
+          onClick={toggleSidebar}
+        />
+      )}
+      
       {/* Sidebar */}
-      <div
+      <aside
         className={clsx(
-          'sidebar bg-card w-full h-full border-r transform transition-transform duration-200 ease-in-out lg:translate-x-0 lg:static lg:inset-0',
+          'sidebar bg-card w-64 border-r transform transition-transform duration-200 ease-in-out flex flex-col',
+          'fixed top-0 bottom-0 left-0 h-full z-50',
+          'lg:translate-x-0 lg:sticky lg:h-screen',
           sidebarOpen ? 'translate-x-0' : '-translate-x-full',
         )}
       >
-        <div className="flex items-center justify-between h-16 px-4 border-b">
+        <div className="flex items-center justify-between h-16 px-4 border-b shrink-0">
           <img src="/avocado-logo.webp" alt="Logo" className="h-8 w-auto" />
           <Button
             variant="ghost"
@@ -58,11 +68,11 @@ export function Layout({ children }: LayoutProps) {
             className="lg:hidden"
             onClick={toggleSidebar}
           >
-            <X className="h-4 w-4" />
+            <X className="h-5 w-5" />
           </Button>
         </div>
 
-        <nav className="flex-1 px-4 py-4 space-y-2 ">
+        <nav className="flex-1 px-4 py-4 space-y-1 overflow-y-auto min-h-0">
           {filteredNavigation.map((item) => {
             const Icon = item.icon
             const isActive = location.pathname === item.href
@@ -71,67 +81,72 @@ export function Layout({ children }: LayoutProps) {
                 key={item.name}
                 to={item.href}
                 className={clsx(
-                  `flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors `,
+                  'flex items-center px-3 py-2.5 rounded-md text-sm font-medium transition-colors',
                   isActive
                     ? 'bg-primary text-primary-foreground'
                     : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground',
                 )}
-                onClick={() => toggleSidebar()}
+                onClick={() => {
+                  // Cerrar sidebar solo en móvil
+                  if (window.innerWidth < 1024) {
+                    toggleSidebar()
+                  }
+                }}
               >
-                <Icon className="mr-3 h-4 w-4" />
+                <Icon className="mr-3 h-5 w-5" />
                 {item.name}
               </Link>
             )
           })}
         </nav>
 
-        <div className="p-4 border-t">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium">{user?.username}</p>
+        <div className="p-4 border-t shrink-0">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium truncate">{user?.username}</p>
               <p className="text-xs text-muted-foreground capitalize">
                 {user?.role}
               </p>
             </div>
-            <Button variant="ghost" size="sm" onClick={logout}>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={logout}
+              className="w-full sm:w-auto"
+            >
               Cerrar Sesión
             </Button>
           </div>
         </div>
-      </div>
+      </aside>
 
-      {/* Top bar */}
-      <header className="header bg-card border-b flex items-center justify-between px-4">
-        <Button
-          variant="ghost"
-          size="sm"
-          className="lg:hidden"
-          onClick={toggleSidebar}
-        >
-          <Menu className="h-4 w-4" />
-        </Button>
+      {/* Main content area */}
+      <div className="flex flex-col flex-1">
+        {/* Top bar */}
+        <header className="header bg-card border-b flex items-center justify-between px-4 h-16 lg:ml-0 shrink-0">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="lg:hidden"
+            onClick={toggleSidebar}
+            aria-label="Abrir menú"
+          >
+            <Menu className="h-5 w-5" />
+          </Button>
 
-        <div className="flex items-center space-x-4 ml-auto">
-          <ThemeToggle
-            variant="default"
-            className="bg-primary/80 hover:bg-primary cursor-pointer"
-          />
-        </div>
-      </header>
+          <div className="flex items-center space-x-2 sm:space-x-4 ml-auto">
+            <ThemeToggle
+              variant="default"
+              className="bg-primary/80 hover:bg-primary cursor-pointer"
+            />
+          </div>
+        </header>
 
-      {/* Main content */}
-      <div className="main">
         {/* Page content */}
-        <main className="p-6">{children}</main>
+        <main className="flex-1 p-4 md:p-6 overflow-auto">
+          {children}
+        </main>
       </div>
-
-      {/* Mobile overlay */}
-      {sidebarOpen && (
-        <div
-          className="fixed inset-0 z-40 bg-black bg-opacity-50 lg:hidden"
-          onClick={toggleSidebar}
-        />
-      )}
     </div>
   )
 }

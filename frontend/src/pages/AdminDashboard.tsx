@@ -112,26 +112,26 @@ function AdminDashboard() {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-bold">Panel de Administración</h1>
-          <p className="text-muted-foreground mt-1">Gestiona usuarios, tareas y configuraciones del sistema</p>
+          <h1 className="text-2xl md:text-3xl font-bold">Panel de Administración</h1>
+          <p className="text-muted-foreground mt-1 text-sm">Gestiona usuarios, tareas y configuraciones del sistema</p>
         </div>
-        <Button>
+        <Button className="w-full sm:w-auto">
           <UserPlus className="h-4 w-4 mr-2" />
           Add User
         </Button>
       </div>
 
       {/* Overview Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
         <Card className="border-l-4 border-l-blue-500">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Total de Usuarios</CardTitle>
-            <Users className="h-4 w-4 text-blue-600" />
+            <CardTitle className="text-xs sm:text-sm font-medium text-muted-foreground">Total de Usuarios</CardTitle>
+            <Users className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold">{stats.totalUsers}</div>
+            <div className="text-2xl sm:text-3xl font-bold">{stats.totalUsers}</div>
             <p className="text-xs text-muted-foreground mt-1">
               {stats.activeUsers} activos
             </p>
@@ -140,11 +140,11 @@ function AdminDashboard() {
 
         <Card className="border-l-4 border-l-purple-500">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Total de Tareas</CardTitle>
-            <ClipboardList className="h-4 w-4 text-purple-600" />
+            <CardTitle className="text-xs sm:text-sm font-medium text-muted-foreground">Total de Tareas</CardTitle>
+            <ClipboardList className="h-4 w-4 sm:h-5 sm:w-5 text-purple-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold">{taskStats.total}</div>
+            <div className="text-2xl sm:text-3xl font-bold">{taskStats.total}</div>
             <p className="text-xs text-muted-foreground mt-1">
               en el sistema
             </p>
@@ -153,11 +153,11 @@ function AdminDashboard() {
 
         <Card className="border-l-4 border-l-green-500">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Tareas Completadas</CardTitle>
-            <CheckCircle className="h-4 w-4 text-green-600" />
+            <CardTitle className="text-xs sm:text-sm font-medium text-muted-foreground">Tareas Completadas</CardTitle>
+            <CheckCircle className="h-4 w-4 sm:h-5 sm:w-5 text-green-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold">{taskStats.completed}</div>
+            <div className="text-2xl sm:text-3xl font-bold">{taskStats.completed}</div>
             <p className="text-xs text-muted-foreground mt-1">
               {taskStats.total > 0 ? Math.round((taskStats.completed / taskStats.total) * 100) : 0}% del total
             </p>
@@ -166,11 +166,11 @@ function AdminDashboard() {
 
         <Card className="border-l-4 border-l-orange-500">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Tareas Pendientes</CardTitle>
-            <Clock className="h-4 w-4 text-orange-600" />
+            <CardTitle className="text-xs sm:text-sm font-medium text-muted-foreground">Tareas Pendientes</CardTitle>
+            <Clock className="h-4 w-4 sm:h-5 sm:w-5 text-orange-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold">{taskStats.pending}</div>
+            <div className="text-2xl sm:text-3xl font-bold">{taskStats.pending}</div>
             <p className="text-xs text-muted-foreground mt-1">
               {taskStats.highPriority} alta prioridad
             </p>
@@ -179,7 +179,7 @@ function AdminDashboard() {
       </div>
 
       {/* User Role Distribution Chart */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
         <Card>
           <CardHeader>
             <CardTitle>User Role Distribution</CardTitle>
@@ -273,15 +273,15 @@ function AdminDashboard() {
             </div>
           </div>
 
-          <div className="rounded-md border">
+          <div className="rounded-md border overflow-x-auto">
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>User</TableHead>
-                  <TableHead>Email</TableHead>
-                  <TableHead>Role</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
+                  <TableHead className="min-w-[150px]">User</TableHead>
+                  <TableHead className="min-w-[200px]">Email</TableHead>
+                  <TableHead className="min-w-[120px]">Role</TableHead>
+                  <TableHead className="min-w-[100px]">Status</TableHead>
+                  <TableHead className="text-right min-w-[100px]">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>

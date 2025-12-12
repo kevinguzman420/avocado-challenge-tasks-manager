@@ -159,10 +159,10 @@ function Users() {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row justify-between sm:items-center space-y-4 sm:space-y-0">
         <div>
-          <h1 className="text-3xl font-bold">Gestión de Usuarios</h1>
-          <p className="text-muted-foreground mt-1">
+          <h1 className="text-2xl sm:text-3xl font-bold">Gestión de Usuarios</h1>
+          <p className="text-muted-foreground mt-1 text-sm sm:text-base">
             Gestiona usuarios del sistema y permisos
           </p>
         </div>
@@ -173,47 +173,47 @@ function Users() {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
         <Card className="border-l-4 border-l-blue-500">
-          <CardContent className="pt-6">
+          <CardContent className="pt-4 md:pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-muted-foreground">
+                <p className="text-xs md:text-sm font-medium text-muted-foreground">
                   Total de Usuarios
                 </p>
-                <p className="text-3xl font-bold">{users.length}</p>
+                <p className="text-2xl md:text-3xl font-bold">{users.length}</p>
               </div>
-              <UsersIcon className="h-8 w-8 text-blue-600" />
+              <UsersIcon className="h-6 w-6 md:h-8 md:w-8 text-blue-600" />
             </div>
           </CardContent>
         </Card>
         <Card className="border-l-4 border-l-purple-500">
-          <CardContent className="pt-6">
+          <CardContent className="pt-4 md:pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-muted-foreground">
+                <p className="text-xs md:text-sm font-medium text-muted-foreground">
                   Administradores
                 </p>
-                <p className="text-3xl font-bold">
+                <p className="text-2xl md:text-3xl font-bold">
                   {users.filter((u) => u.role === UserRole.ADMIN).length}
                 </p>
               </div>
-              <Shield className="h-8 w-8 text-purple-600" />
+              <Shield className="h-6 w-6 md:h-8 md:w-8 text-purple-600" />
             </div>
           </CardContent>
         </Card>
-        <Card className="border-l-4 border-l-green-500">
-          <CardContent className="pt-6">
+        <Card className="border-l-4 border-l-green-500 sm:col-span-2 lg:col-span-1">
+          <CardContent className="pt-4 md:pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-muted-foreground">
+                <p className="text-xs md:text-sm font-medium text-muted-foreground">
                   Usuarios Activos
                 </p>
-                <p className="text-3xl font-bold">
+                <p className="text-2xl md:text-3xl font-bold">
                   {users.filter((u) => u.is_active).length}
                 </p>
               </div>
-              <AlertCircle className="h-8 w-8 text-green-600" />
+              <AlertCircle className="h-6 w-6 md:h-8 md:w-8 text-green-600" />
             </div>
           </CardContent>
         </Card>
@@ -222,7 +222,7 @@ function Users() {
       {/* Filters and Table */}
       <Card>
         <CardContent className="pt-6">
-          <div className="flex items-center space-x-2 mb-6">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center space-y-2 sm:space-y-0 sm:space-x-2 mb-6">
             <div className="relative flex-1">
               <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input
@@ -233,7 +233,7 @@ function Users() {
               />
             </div>
             <Select value={roleFilter} onValueChange={setRoleFilter}>
-              <SelectTrigger className="w-[180px]">
+              <SelectTrigger className="w-full sm:w-[180px]">
                 <SelectValue placeholder="Filtrar por rol" />
               </SelectTrigger>
               <SelectContent className=" bg-card ">
@@ -260,126 +260,242 @@ function Users() {
               <p className="text-muted-foreground">Cargando usuarios...</p>
             </div>
           ) : (
-            <div className="rounded-md border">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Usuario</TableHead>
-                    <TableHead>Correo Electrónico</TableHead>
-                    <TableHead>Rol</TableHead>
-                    <TableHead>Estado</TableHead>
-                    <TableHead className="text-right">Acciones</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredUsers.length === 0 ? (
+            <>
+              {/* Desktop Table View */}
+              <div className="hidden md:block rounded-md border overflow-x-auto">
+                <Table>
+                  <TableHeader>
                     <TableRow>
-                      <TableCell
-                        colSpan={5}
-                        className="text-center text-muted-foreground py-8"
-                      >
-                        No se encontraron usuarios
-                      </TableCell>
+                      <TableHead>Usuario</TableHead>
+                      <TableHead>Correo Electrónico</TableHead>
+                      <TableHead>Rol</TableHead>
+                      <TableHead>Estado</TableHead>
+                      <TableHead className="text-right">Acciones</TableHead>
                     </TableRow>
-                  ) : (
-                    filteredUsers.map((user) => (
-                      <TableRow key={user.id}>
-                        <TableCell>
-                          <div className="flex items-center space-x-3">
-                            <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
-                              <UsersIcon className="h-5 w-5 text-primary" />
-                            </div>
-                            <div className="font-semibold">
-                              {user.full_name || user.email.split('@')[0]}
-                            </div>
-                          </div>
-                        </TableCell>
-                        <TableCell>{user.email}</TableCell>
-                        <TableCell>
-                          <Select
-                            value={user.role}
-                            onValueChange={(value) =>
-                              handleRoleChange(
-                                user.id,
-                                value as 'admin' | 'regular',
-                              )
-                            }
-                          >
-                            <SelectTrigger className="w-[140px]">
-                              <SelectValue>
-                                <span
-                                  className={`px-2 py-1 rounded-full text-xs font-medium ${
-                                    ROLE_COLORS[
-                                      user.role as keyof typeof ROLE_COLORS
-                                    ] || ''
-                                  }`}
-                                >
-                                  {ROLE_LABELS[
-                                    user.role as keyof typeof ROLE_LABELS
-                                  ] || user.role}
-                                </span>
-                              </SelectValue>
-                            </SelectTrigger>
-                            <SelectContent className=" bg-card ">
-                              <SelectItem value={UserRole.REGULAR}>
-                                Usuario Regular
-                              </SelectItem>
-                              <SelectItem value={UserRole.ADMIN}>
-                                Administrador
-                              </SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </TableCell>
-                        <TableCell>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() =>
-                              handleToggleStatus(
-                                user.id,
-                                user.is_active || false,
-                              )
-                            }
-                            className="h-auto p-0"
-                          >
-                            <span
-                              className={`px-2 py-1 rounded-full text-xs font-medium ${
-                                user.is_active
-                                  ? 'bg-green-100 text-green-800 hover:bg-green-200'
-                                  : 'bg-red-100 text-red-800 hover:bg-red-200'
-                              }`}
-                            >
-                              {user.is_active ? 'Activo' : 'Inactivo'}
-                            </span>
-                          </Button>
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <div className="flex items-center justify-end space-x-2">
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleOpenEditDialog(user)}
-                              title="Cambiar contraseña"
-                            >
-                              <Edit className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleDeleteUser(user.id)}
-                              className="text-red-600 hover:text-red-700"
-                              title="Eliminar usuario"
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </div>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredUsers.length === 0 ? (
+                      <TableRow>
+                        <TableCell
+                          colSpan={5}
+                          className="text-center text-muted-foreground py-8"
+                        >
+                          No se encontraron usuarios
                         </TableCell>
                       </TableRow>
-                    ))
-                  )}
-                </TableBody>
-              </Table>
-            </div>
+                    ) : (
+                      filteredUsers.map((user) => (
+                        <TableRow key={user.id}>
+                          <TableCell>
+                            <div className="flex items-center space-x-3">
+                              <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                                <UsersIcon className="h-5 w-5 text-primary" />
+                              </div>
+                              <div className="font-semibold">
+                                {user.full_name || user.email.split('@')[0]}
+                              </div>
+                            </div>
+                          </TableCell>
+                          <TableCell>{user.email}</TableCell>
+                          <TableCell>
+                            <Select
+                              value={user.role}
+                              onValueChange={(value) =>
+                                handleRoleChange(
+                                  user.id,
+                                  value as 'admin' | 'regular',
+                                )
+                              }
+                            >
+                              <SelectTrigger className="w-[140px]">
+                                <SelectValue>
+                                  <span
+                                    className={`px-2 py-1 rounded-full text-xs font-medium ${
+                                      ROLE_COLORS[
+                                        user.role as keyof typeof ROLE_COLORS
+                                      ] || ''
+                                    }`}
+                                  >
+                                    {ROLE_LABELS[
+                                      user.role as keyof typeof ROLE_LABELS
+                                    ] || user.role}
+                                  </span>
+                                </SelectValue>
+                              </SelectTrigger>
+                              <SelectContent className=" bg-card ">
+                                <SelectItem value={UserRole.REGULAR}>
+                                  Usuario Regular
+                                </SelectItem>
+                                <SelectItem value={UserRole.ADMIN}>
+                                  Administrador
+                                </SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </TableCell>
+                          <TableCell>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() =>
+                                handleToggleStatus(
+                                  user.id,
+                                  user.is_active || false,
+                                )
+                              }
+                              className="h-auto p-0"
+                            >
+                              <span
+                                className={`px-2 py-1 rounded-full text-xs font-medium ${
+                                  user.is_active
+                                    ? 'bg-green-100 text-green-800 hover:bg-green-200 dark:bg-green-900 dark:text-green-200'
+                                    : 'bg-red-100 text-red-800 hover:bg-red-200 dark:bg-red-900 dark:text-red-200'
+                                }`}
+                              >
+                                {user.is_active ? 'Activo' : 'Inactivo'}
+                              </span>
+                            </Button>
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <div className="flex items-center justify-end space-x-1">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleOpenEditDialog(user)}
+                                title="Cambiar contraseña"
+                              >
+                                <Edit className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleDeleteUser(user.id)}
+                                className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950"
+                                title="Eliminar usuario"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    )}
+                  </TableBody>
+                </Table>
+              </div>
+
+              {/* Mobile Cards View */}
+              <div className="md:hidden space-y-4">
+                {filteredUsers.length === 0 ? (
+                  <div className="text-center py-8">
+                    <p className="text-muted-foreground">No se encontraron usuarios</p>
+                  </div>
+                ) : (
+                  filteredUsers.map((user) => (
+                    <Card key={user.id}>
+                      <CardContent className="p-4">
+                        <div className="flex items-start gap-3 mb-3">
+                          <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                            <UsersIcon className="h-6 w-6 text-primary" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <h3 className="font-semibold text-sm truncate">
+                              {user.full_name || user.email.split('@')[0]}
+                            </h3>
+                            <p className="text-xs text-muted-foreground truncate">
+                              {user.email}
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="space-y-2 mb-3">
+                          <div className="flex items-center justify-between">
+                            <span className="text-xs text-muted-foreground">Rol:</span>
+                            <Select
+                              value={user.role}
+                              onValueChange={(value) =>
+                                handleRoleChange(
+                                  user.id,
+                                  value as 'admin' | 'regular',
+                                )
+                              }
+                            >
+                              <SelectTrigger className="w-[140px] h-8">
+                                <SelectValue>
+                                  <span
+                                    className={`px-2 py-1 rounded-full text-xs font-medium ${
+                                      ROLE_COLORS[
+                                        user.role as keyof typeof ROLE_COLORS
+                                      ] || ''
+                                    }`}
+                                  >
+                                    {ROLE_LABELS[
+                                      user.role as keyof typeof ROLE_LABELS
+                                    ] || user.role}
+                                  </span>
+                                </SelectValue>
+                              </SelectTrigger>
+                              <SelectContent className=" bg-card ">
+                                <SelectItem value={UserRole.REGULAR}>
+                                  Usuario Regular
+                                </SelectItem>
+                                <SelectItem value={UserRole.ADMIN}>
+                                  Administrador
+                                </SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+
+                          <div className="flex items-center justify-between">
+                            <span className="text-xs text-muted-foreground">Estado:</span>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() =>
+                                handleToggleStatus(
+                                  user.id,
+                                  user.is_active || false,
+                                )
+                              }
+                              className="h-auto p-0"
+                            >
+                              <span
+                                className={`px-2 py-1 rounded-full text-xs font-medium ${
+                                  user.is_active
+                                    ? 'bg-green-100 text-green-800 hover:bg-green-200 dark:bg-green-900 dark:text-green-200'
+                                    : 'bg-red-100 text-red-800 hover:bg-red-200 dark:bg-red-900 dark:text-red-200'
+                                }`}
+                              >
+                                {user.is_active ? 'Activo' : 'Inactivo'}
+                              </span>
+                            </Button>
+                          </div>
+                        </div>
+
+                        <div className="flex gap-2 pt-2 border-t">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleOpenEditDialog(user)}
+                            className="flex-1"
+                          >
+                            <Edit className="h-3.5 w-3.5 mr-1" />
+                            Cambiar Contraseña
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleDeleteUser(user.id)}
+                            className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950"
+                          >
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))
+                )}
+              </div>
+            </>
           )}
         </CardContent>
       </Card>

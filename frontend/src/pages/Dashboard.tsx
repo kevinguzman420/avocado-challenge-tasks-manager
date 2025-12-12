@@ -79,51 +79,51 @@ function Dashboard() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold mb-6">Panel de Control</h1>
+      <h1 className="text-2xl md:text-3xl font-bold mb-6">Panel de Control</h1>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-8">
         {metrics.map((metric) => {
           const Icon = metric.icon;
           return (
             <Card key={metric.title}>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">
+                <CardTitle className="text-xs sm:text-sm font-medium">
                   {metric.title}
                 </CardTitle>
-                <Icon className={`h-4 w-4 ${metric.color}`} />
+                <Icon className={`h-5 w-5 ${metric.color}`} />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{metric.value}</div>
+                <div className="text-xl sm:text-2xl font-bold">{metric.value}</div>
               </CardContent>
             </Card>
           );
         })}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
         <Card>
-          <CardHeader>
-            <CardTitle>Tareas Recientes</CardTitle>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base md:text-lg">Tareas Recientes</CardTitle>
           </CardHeader>
           <CardContent>
             {isLoading ? (
-              <p className="text-muted-foreground">Cargando...</p>
+              <p className="text-sm text-muted-foreground">Cargando...</p>
             ) : recentTasks.length === 0 ? (
-              <p className="text-muted-foreground">No hay tareas recientes</p>
+              <p className="text-sm text-muted-foreground">No hay tareas recientes</p>
             ) : (
-              <div className="space-y-3">
+              <div className="space-y-2">
                 {recentTasks.map(task => (
-                  <div key={task.id} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
-                    <div className="flex-1">
-                      <p className="font-medium text-sm">{task.title}</p>
+                  <div key={task.id} className="flex items-center justify-between gap-3 p-3 bg-muted/50 rounded-lg hover:bg-muted/70 transition-colors">
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium text-sm truncate">{task.title}</p>
                       <p className="text-xs text-muted-foreground">
                         Prioridad: {task.priority === 'high' ? 'Alta' : task.priority === 'medium' ? 'Media' : 'Baja'}
                       </p>
                     </div>
                     {task.completed ? (
-                      <CheckCircle className="h-4 w-4 text-green-600" />
+                      <CheckCircle className="h-5 w-5 text-green-600 shrink-0" />
                     ) : (
-                      <Clock className="h-4 w-4 text-yellow-600" />
+                      <Clock className="h-5 w-5 text-yellow-600 shrink-0" />
                     )}
                   </div>
                 ))}
@@ -133,20 +133,20 @@ function Dashboard() {
         </Card>
 
         <Card>
-          <CardHeader>
-            <CardTitle>Próximas Fechas Límite</CardTitle>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base md:text-lg">Próximas Fechas Límite</CardTitle>
           </CardHeader>
           <CardContent>
             {isLoading ? (
-              <p className="text-muted-foreground">Cargando...</p>
+              <p className="text-sm text-muted-foreground">Cargando...</p>
             ) : upcomingTasks.length === 0 ? (
-              <p className="text-muted-foreground">No hay tareas próximas a vencer</p>
+              <p className="text-sm text-muted-foreground">No hay tareas próximas a vencer</p>
             ) : (
-              <div className="space-y-3">
+              <div className="space-y-2">
                 {upcomingTasks.map(task => (
-                  <div key={task.id} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
-                    <div className="flex-1">
-                      <p className="font-medium text-sm">{task.title}</p>
+                  <div key={task.id} className="flex items-center justify-between gap-3 p-3 bg-muted/50 rounded-lg hover:bg-muted/70 transition-colors">
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium text-sm truncate">{task.title}</p>
                       <p className="text-xs text-muted-foreground">
                         Vence: {new Date(task.due_date).toLocaleDateString('es-ES', {
                           day: 'numeric',
@@ -155,7 +155,7 @@ function Dashboard() {
                         })}
                       </p>
                     </div>
-                    <AlertTriangle className={`h-4 w-4 ${
+                    <AlertTriangle className={`h-5 w-5 shrink-0 ${
                       task.priority === 'high' ? 'text-red-600' : 
                       task.priority === 'medium' ? 'text-yellow-600' : 
                       'text-blue-600'
