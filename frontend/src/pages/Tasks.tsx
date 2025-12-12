@@ -175,31 +175,32 @@ function Tasks() {
 
   return (
     <div>
-      <div className="flex justify-between items-center mb-6">
-        <div>
-          <h1 className="text-2xl font-bold">Tareas</h1>
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+        <div className="flex-1">
+          <h1 className="text-2xl md:text-3xl font-bold">Tareas</h1>
           {isLoading && (
             <p className="text-sm text-muted-foreground mt-1">
               Cargando tareas...
             </p>
           )}
         </div>
-        <div className="flex space-x-2">
+        <div className="flex flex-col sm:flex-row w-full sm:w-auto gap-2">
           <Button
             variant="outline"
             onClick={() => fetchTasks()}
             disabled={isLoading}
+            className="w-full sm:w-auto"
           >
             {isLoading ? 'Cargando...' : 'Actualizar'}
           </Button>
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
-              <Button onClick={handleCreateTask}>
+              <Button onClick={handleCreateTask} className="w-full sm:w-auto">
                 <Plus className="h-4 w-4 mr-2" />
                 Nueva Tarea
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-4xl">
+            <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
               <TaskForm
                 task={editingTask}
                 onSubmit={handleFormSubmit}
@@ -213,20 +214,22 @@ function Tasks() {
       {/* Filters */}
       <Card className="mb-6">
         <CardHeader>
-          <CardTitle className="flex items-center">
+          <CardTitle className="flex items-center text-base md:text-lg">
             <Filter className="h-4 w-4 mr-2" />
             Filtros
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-            <div className="flex space-x-2">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+            <div className="flex gap-2 sm:col-span-2 lg:col-span-1">
               <Input
                 placeholder="Buscar tareas..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+                className="flex-1"
               />
-              <Button onClick={handleSearch} variant="outline">
+              <Button onClick={handleSearch} variant="outline" size="icon" className="shrink-0">
                 <Search className="h-4 w-4" />
               </Button>
             </div>
@@ -296,6 +299,7 @@ function Tasks() {
                 setFilters({})
                 setSearchTerm('')
               }}
+              className="w-full sm:w-auto"
             >
               Limpiar Filtros
             </Button>
@@ -332,7 +336,7 @@ function Tasks() {
         </div>
       )}
 
-      {/* Tasks Table */}
+      {/* Tasks Table/Cards */}
       <Card>
         <CardContent className="p-0">
           {tasks.length === 0 ? (
@@ -340,65 +344,165 @@ function Tasks() {
               <p className="text-muted-foreground">No se encontraron tareas</p>
             </div>
           ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="w-[50px]">Estado</TableHead>
-                  <TableHead>Título</TableHead>
-                  <TableHead>Descripción</TableHead>
-                  <TableHead>Prioridad</TableHead>
-                  <TableHead>Fecha Límite</TableHead>
-                  <TableHead className="text-right">Acciones</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
+            <>
+              {/* Desktop Table View */}
+              <div className="hidden md:block overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="w-[50px]">Estado</TableHead>
+                      <TableHead>Título</TableHead>
+                      <TableHead className="hidden lg:table-cell">Descripción</TableHead>
+                      <TableHead>Prioridad</TableHead>
+                      <TableHead>Fecha Límite</TableHead>
+                      <TableHead className="text-right">Acciones</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {tasks.map((task) => (
+                      <TableRow key={task.id}>
+                        <TableCell>
+                          <Button
+                            variant={task.completed ? 'default' : 'outline'}
+                            size="sm"
+                            onClick={() => handleToggleComplete(task)}
+                            className={clsx(
+                              'bg-gray-200 hover:bg-gray-300',
+                              task.completed
+                                ? 'bg-green-600 hover:bg-green-700 text-white'
+                                : 'border-gray-300 text-gray-600',
+                            )}
+                          >
+                            {task.completed ? (
+                              <Check className="h-4 w-4" />
+                            ) : (
+                              <X className="h-4 w-4" />
+                            )}
+                          </Button>
+                        </TableCell>
+                        <TableCell className="font-medium">
+                          <span
+                            className={
+                              task.completed
+                                ? 'line-through text-muted-foreground'
+                                : ''
+                            }
+                          >
+                            {task.title}
+                          </span>
+                        </TableCell>
+                        <TableCell className="hidden lg:table-cell max-w-md">
+                          <span className="text-sm text-muted-foreground line-clamp-2">
+                            {task.description}
+                          </span>
+                        </TableCell>
+                        <TableCell>
+                          <Badge
+                            variant={
+                              task.priority === 'high' ? 'destructive' : 'secondary'
+                            }
+                            className={
+                              task.priority === 'medium'
+                                ? 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200 dark:bg-yellow-900 dark:text-yellow-200'
+                                : task.priority === 'low'
+                                ? 'bg-green-100 text-green-800 hover:bg-green-200 dark:bg-green-900 dark:text-green-200'
+                                : ''
+                            }
+                          >
+                            {task.priority === 'high'
+                              ? 'Alta'
+                              : task.priority === 'medium'
+                              ? 'Media'
+                              : 'Baja'}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          <span className="text-sm whitespace-nowrap">
+                            {new Date(task.due_date).toLocaleDateString('es-ES', {
+                              day: '2-digit',
+                              month: '2-digit',
+                              year: 'numeric',
+                            })}
+                          </span>
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <div className="flex justify-end space-x-1">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleEditTask(task)}
+                              title="Editar"
+                            >
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleDeleteTask(task.id)}
+                              className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950"
+                              title="Eliminar"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+
+              {/* Mobile Cards View */}
+              <div className="md:hidden divide-y">
                 {tasks.map((task) => (
-                  <TableRow key={task.id}>
-                    <TableCell>
-                      <Button
-                        variant={task.completed ? 'default' : 'outline'}
-                        size="sm"
-                        onClick={() => handleToggleComplete(task)}
-                        className={clsx(
-                          ' bg-gray-200 hover:bg-gray-300 ',
-                          task.completed
-                            ? 'bg-green-600 hover:bg-green-700 text-black dark:text-white'
-                            : 'border-gray-300 text-gray-600 ',
-                        )}
-                      >
-                        {task.completed ? (
-                          <Check className="h-4 w-4" />
-                        ) : (
-                          <X className="h-4 w-4 text-black " />
-                        )}
-                      </Button>
-                    </TableCell>
-                    <TableCell className="font-medium">
-                      <span
-                        className={
-                          task.completed
-                            ? 'line-through text-muted-foreground'
-                            : ''
-                        }
-                      >
-                        {task.title}
-                      </span>
-                    </TableCell>
-                    <TableCell className="max-w-md">
-                      <span className="text-sm text-muted-foreground line-clamp-2">
-                        {task.description}
-                      </span>
-                    </TableCell>
-                    <TableCell>
+                  <div key={task.id} className="p-4 space-y-3">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-1">
+                          <Button
+                            variant={task.completed ? 'default' : 'outline'}
+                            size="sm"
+                            onClick={() => handleToggleComplete(task)}
+                            className={clsx(
+                              'shrink-0',
+                              task.completed
+                                ? 'bg-green-600 hover:bg-green-700 text-white'
+                                : 'border-gray-300 text-gray-600',
+                            )}
+                          >
+                            {task.completed ? (
+                              <Check className="h-4 w-4" />
+                            ) : (
+                              <X className="h-4 w-4" />
+                            )}
+                          </Button>
+                          <h3
+                            className={
+                              clsx(
+                                'font-medium text-sm truncate',
+                                task.completed && 'line-through text-muted-foreground'
+                              )
+                            }
+                          >
+                            {task.title}
+                          </h3>
+                        </div>
+                        <p className="text-xs text-muted-foreground line-clamp-2 ml-11">
+                          {task.description}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex flex-wrap items-center gap-2 text-xs">
                       <Badge
                         variant={
                           task.priority === 'high' ? 'destructive' : 'secondary'
                         }
                         className={
                           task.priority === 'medium'
-                            ? 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200'
+                            ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'
                             : task.priority === 'low'
-                            ? 'bg-green-100 text-green-800 hover:bg-green-200'
+                            ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
                             : ''
                         }
                       >
@@ -408,39 +512,39 @@ function Tasks() {
                           ? 'Media'
                           : 'Baja'}
                       </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <span className="text-sm">
+                      <span className="text-muted-foreground">
                         {new Date(task.due_date).toLocaleDateString('es-ES', {
                           day: '2-digit',
-                          month: '2-digit',
+                          month: 'short',
                           year: 'numeric',
                         })}
                       </span>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex justify-end space-x-2">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleEditTask(task)}
-                        >
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleDeleteTask(task.id)}
-                          className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
+                    </div>
+
+                    <div className="flex gap-2 pt-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleEditTask(task)}
+                        className="flex-1"
+                      >
+                        <Edit className="h-3.5 w-3.5 mr-1" />
+                        Editar
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleDeleteTask(task.id)}
+                        className="flex-1 text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950"
+                      >
+                        <Trash2 className="h-3.5 w-3.5 mr-1" />
+                        Eliminar
+                      </Button>
+                    </div>
+                  </div>
                 ))}
-              </TableBody>
-            </Table>
+              </div>
+            </>
           )}
         </CardContent>
       </Card>
@@ -449,14 +553,14 @@ function Tasks() {
       {totalTasks > 0 && (
         <Card className="mt-4">
           <CardContent className="p-4">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row items-center justify-between space-y-2 sm:space-y-0">
               <div className="text-sm text-muted-foreground">
                 Mostrando{' '}
                 {Math.min((currentPage - 1) * tasksPerPage + 1, totalTasks)} a{' '}
                 {Math.min(currentPage * tasksPerPage, totalTasks)} de{' '}
                 {totalTasks} tareas
               </div>
-              <div className="flex items-center space-x-2">
+              <div className="flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-2">
                 <Button
                   variant="outline"
                   size="sm"

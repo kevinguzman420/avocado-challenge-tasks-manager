@@ -101,19 +101,19 @@ function Signup() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background px-4 relative overflow-y-auto">
-      <div className="absolute top-4 right-4">
+    <div className="min-h-screen flex items-center justify-center bg-background px-4 py-8 relative overflow-y-auto">
+      <div className="absolute top-4 right-4 z-10">
         <ThemeToggle />
       </div>
-      <Card className="w-full max-w-md my-12 ">
-        <CardHeader className="space-y-1">
+      <Card className="w-full max-w-md my-8">
+        <CardHeader className="space-y-2 pb-4">
           <img
             src="/avocado-logo.webp"
             alt="Avocado Logo"
-            className="h-12 w-auto mx-auto mb-2"
+            className="h-10 md:h-12 w-auto mx-auto mb-2"
           />
-          <CardTitle className="text-2xl text-center">Crear Cuenta</CardTitle>
-          <CardDescription className="text-center">
+          <CardTitle className="text-xl md:text-2xl text-center">Crear Cuenta</CardTitle>
+          <CardDescription className="text-center text-sm">
             Ingresa tu información para crear tu cuenta
           </CardDescription>
         </CardHeader>

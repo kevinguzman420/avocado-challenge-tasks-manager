@@ -123,8 +123,8 @@ function AdminStatistics() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold">Estadísticas del Sistema</h1>
-        <p className="text-muted-foreground mt-1">Vista general de tareas de los usuarios</p>
+        <h1 className="text-2xl sm:text-3xl font-bold">Estadísticas del Sistema</h1>
+        <p className="text-muted-foreground mt-1 text-sm sm:text-base">Vista general de tareas de los usuarios</p>
       </div>
 
       {/* Summary Cards */}
