@@ -17,6 +17,7 @@ def sample_task_for_comments(db: Session, test_user: User) -> Task:
         title="Task for Comments",
         description="Testing comment functionality",
         created_by=test_user.id,
+        assigned_to=test_user.id,  # Assign the task to the test user
         completed=False
     )
     db.add(task)
@@ -226,10 +227,11 @@ class TestRetrieveComments:
     
     def test_get_comments_empty_task(self, client: TestClient, auth_headers: dict, test_user: User, db: Session):
         """Test retrieving comments from task with no comments."""
-        # Create task without comments
+        # Create task without comments, assigned to the user
         task = Task(
             title="Task without comments",
             created_by=test_user.id,
+            assigned_to=test_user.id,
             completed=False
         )
         db.add(task)
@@ -336,9 +338,9 @@ class TestUpdateComment:
         
         assert response.status_code == 403
     
-    def test_update_comment_as_admin(self, client: TestClient, admin_auth_headers: dict, sample_task_for_comments: Task, test_user: User, db: Session):
-        """Test admin can update any comment."""
-        # Create comment by regular user
+    def test_update_comment_as_admin_on_unassigned_task(self, client: TestClient, admin_auth_headers: dict, sample_task_for_comments: Task, test_user: User, db: Session):
+        """Test admin CANNOT update a comment on a task not assigned to them."""
+        # sample_task_for_comments is assigned to test_user, not admin
         comment = Comment(
             content="User comment",
             task_id=sample_task_for_comments.id,
@@ -358,9 +360,7 @@ class TestUpdateComment:
             headers=admin_auth_headers
         )
         
-        assert response.status_code == 200
-        data = response.json()
-        assert data["content"] == update_data["content"]
+        assert response.status_code == 404
 
 
 class TestDeleteComment:
@@ -410,9 +410,9 @@ class TestDeleteComment:
         
         assert response.status_code == 403
     
-    def test_delete_comment_as_admin(self, client: TestClient, admin_auth_headers: dict, sample_task_for_comments: Task, test_user: User, db: Session):
-        """Test admin can delete any comment."""
-        # Create comment by regular user
+    def test_delete_comment_as_admin_on_unassigned_task(self, client: TestClient, admin_auth_headers: dict, sample_task_for_comments: Task, test_user: User, db: Session):
+        """Test admin CANNOT delete a comment on a task not assigned to them."""
+        # sample_task_for_comments is assigned to test_user, not admin
         comment = Comment(
             content="User comment",
             task_id=sample_task_for_comments.id,
@@ -427,7 +427,7 @@ class TestDeleteComment:
             headers=admin_auth_headers
         )
         
-        assert response.status_code == 200
+        assert response.status_code == 404
     
     def test_delete_nonexistent_comment(self, client: TestClient, auth_headers: dict, sample_task_for_comments: Task):
         """Test deleting non-existent comment returns 404."""

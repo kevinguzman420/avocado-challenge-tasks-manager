@@ -51,7 +51,7 @@ def get_tasks(
     assigned_to: Optional[int] = Query(None, description="Filter by assigned user ID (admin only)"),
     search: Optional[str] = None,
     sort_by: str = Query("created_at", description="Field to sort by"),
-    sort_order: str = Query("desc", regex="^(asc|desc)$"),
+    sort_order: str = Query("desc", pattern="^(asc|desc)$"),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
