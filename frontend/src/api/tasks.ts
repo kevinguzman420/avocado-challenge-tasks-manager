@@ -25,10 +25,17 @@ export const tasksApi = {
     if (filters?.priority) params.append('priority', filters.priority);
     if (filters?.assigned_to) params.append('assigned_to', filters.assigned_to.toString());
     if (filters?.search) params.append('search', filters.search);
-    params.append('page', page.toString());
+    params.append('skip', ((page - 1) * limit).toString());
     params.append('limit', limit.toString());
 
     const response = await api.get(`tasks?${params}`);
+    return response.data;
+  },
+
+  // Get all tasks (for admin use)
+  getAllTasks: async (): Promise<TasksResponse> => {
+    // Use the same endpoint without parameters, backend should return all tasks for admin
+    const response = await api.get(`tasks`);
     return response.data;
   },
 
@@ -46,7 +53,7 @@ export const tasksApi = {
   },
 
   // Update task
-  updateTask: async (id: number, updates: Partial<CreateTaskData>): Promise<Task> => {
+  updateTask: async (id: number, updates: Partial<CreateTaskData> | { completed?: boolean }): Promise<Task> => {
     const response = await api.put(`tasks/${id}`, updates);
     return response.data;
   },

@@ -13,7 +13,7 @@ import { Loader2, MessageSquare, Send, Trash2 } from 'lucide-react';
 import type { Comment } from '../types';
 
 const commentSchema = z.object({
-  content: z.string().min(1, 'Comment cannot be empty').max(500, 'Comment too long'),
+  content: z.string().min(1, 'El comentario no puede estar vacío').max(500, 'Comentario demasiado largo'),
 });
 
 type CommentFormData = z.infer<typeof commentSchema>;
@@ -68,7 +68,7 @@ export function TaskComments({ taskId }: TaskCommentsProps) {
         : (response?.items || response?.comments || []);
       setComments(taskId, fetchedComments);
     } catch (err: any) {
-      setError(taskId, err.response?.data?.detail || 'Failed to load comments');
+      setError(taskId, err.response?.data?.detail || 'Error al cargar comentarios');
     } finally {
       setLoading(taskId, false);
     }
@@ -81,20 +81,20 @@ export function TaskComments({ taskId }: TaskCommentsProps) {
       addComment(taskId, newComment);
       reset();
     } catch (err: any) {
-      setError(taskId, err.response?.data?.detail || 'Failed to add comment');
+      setError(taskId, err.response?.data?.detail || 'Error al agregar comentario');
     } finally {
       setIsSubmitting(false);
     }
   };
 
   const handleDeleteComment = async (commentId: number) => {
-    if (!confirm('Are you sure you want to delete this comment?')) return;
+    if (!confirm('¿Estás seguro de que quieres eliminar este comentario?')) return;
 
     try {
       await tasksApi.deleteComment(commentId);
       removeComment(taskId, commentId);
     } catch (err: any) {
-      setError(taskId, err.response?.data?.detail || 'Failed to delete comment');
+      setError(taskId, err.response?.data?.detail || 'Error al eliminar comentario');
     }
   };
 
@@ -110,20 +110,20 @@ export function TaskComments({ taskId }: TaskCommentsProps) {
         className="w-full"
       >
         <MessageSquare className="h-4 w-4 mr-2" />
-        Comments ({taskComments.length})
+        Comentarios ({taskComments.length})
       </Button>
 
       {showComments && (
         <Card>
           <CardHeader>
-            <CardTitle className="text-lg">Comments</CardTitle>
+            <CardTitle className="text-lg">Comentarios</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             {/* Add comment form */}
             <form onSubmit={handleSubmit(onSubmit)} className="flex space-x-2">
               <div className="flex-1">
                 <Input
-                  placeholder="Add a comment..."
+                  placeholder="Agrega un comentario..."
                   {...register('content')}
                   disabled={isSubmitting}
                 />
@@ -155,7 +155,7 @@ export function TaskComments({ taskId }: TaskCommentsProps) {
                 </div>
               ) : taskComments.length === 0 ? (
                 <p className="text-muted-foreground text-center py-4">
-                  No comments yet. Be the first to comment!
+                  No hay comentarios aún. ¡Sé el primero en comentar!
                 </p>
               ) : (
                 taskComments.map((comment) => {
@@ -163,7 +163,7 @@ export function TaskComments({ taskId }: TaskCommentsProps) {
                   const displayName = comment.user?.username 
                     || comment.user?.email 
                     || (comment.user_id === user?.id ? (user?.full_name || user?.username || user?.email) : null)
-                    || 'Unknown User';
+                    || 'Usuario Desconocido';
                   
                   return (
                   <div key={comment.id} className="border rounded-lg p-3 bg-muted/50">

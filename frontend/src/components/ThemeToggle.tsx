@@ -21,7 +21,7 @@ export function ThemeToggle({
       size={size}
       onClick={toggleTheme}
       className={className}
-      title={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
+      title={`Cambiar a modo ${theme === 'light' ? 'oscuro' : 'claro'}`}
     >
       {theme === 'light' ? (
         <Moon className="h-4 w-4" />

@@ -16,10 +16,10 @@ import { useAuthStore } from '../stores/authStore'
 import type { Task } from '../types'
 
 const taskSchema = z.object({
-  title: z.string().min(1, 'Title is required'),
-  description: z.string().min(1, 'Description is required'),
-  due_date: z.string().min(1, 'Due date is required'),
-  due_time: z.string().min(1, 'Due time is required'),
+  title: z.string().min(1, 'El título es requerido'),
+  description: z.string().min(1, 'La descripción es requerida'),
+  due_date: z.string().min(1, 'La fecha de vencimiento es requerida'),
+  due_time: z.string().min(1, 'La hora de vencimiento es requerida'),
   priority: z.enum(['low', 'medium', 'high']),
   assigned_to: z.number().optional(),
 })
@@ -79,13 +79,13 @@ export function TaskForm({ task, onSubmit, onCancel }: TaskFormProps) {
   return (
     <Card className="w-full max-w-2xl mx-auto">
       <CardHeader>
-        <CardTitle>{task ? 'Edit Task' : 'Create New Task'}</CardTitle>
+        <CardTitle>{task ? 'Editar Tarea' : 'Crear Nueva Tarea'}</CardTitle>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium mb-1">Title</label>
-            <Input {...register('title')} placeholder="Enter task title" />
+            <label className="block text-sm font-medium mb-1">Título</label>
+            <Input {...register('title')} placeholder="Ingresa el título de la tarea" />
             {errors.title && (
               <p className="text-sm text-red-600 mt-1">
                 {errors.title.message}
@@ -94,8 +94,22 @@ export function TaskForm({ task, onSubmit, onCancel }: TaskFormProps) {
           </div>
 
           <div>
+            <label className="block text-sm font-medium mb-1">Descripción</label>
+            <Textarea
+              {...register('description')}
+              placeholder="Describe los detalles de la tarea"
+              rows={4}
+            />
+            {errors.description && (
+              <p className="text-sm text-red-600 mt-1">
+                {errors.description.message}
+              </p>
+            )}
+          </div>
+
+          <div>
             <div>
-              <label className="block text-sm font-medium mb-1">Due Date</label>
+              <label className="block text-sm font-medium mb-1">Fecha de Vencimiento</label>
               <Input type="date" {...register('due_date')} />
               {errors.due_date && (
                 <p className="text-sm text-red-600 mt-1">
@@ -105,7 +119,7 @@ export function TaskForm({ task, onSubmit, onCancel }: TaskFormProps) {
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-1">Due Time</label>
+              <label className="block text-sm font-medium mb-1">Hora de Vencimiento</label>
               <Input type="time" {...register('due_time')} />
               {errors.due_time && (
                 <p className="text-sm text-red-600 mt-1">
@@ -115,7 +129,7 @@ export function TaskForm({ task, onSubmit, onCancel }: TaskFormProps) {
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-1">Priority</label>
+              <label className="block text-sm font-medium mb-1">Prioridad</label>
               <Select
                 value={priority}
                 onValueChange={(value) =>
@@ -123,12 +137,12 @@ export function TaskForm({ task, onSubmit, onCancel }: TaskFormProps) {
                 }
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Select priority" />
+                  <SelectValue placeholder="Selecciona prioridad" />
                 </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="low">Low</SelectItem>
-                  <SelectItem value="medium">Medium</SelectItem>
-                  <SelectItem value="high">High</SelectItem>
+                <SelectContent className=' bg-card '>
+                  <SelectItem value="low">Baja</SelectItem>
+                  <SelectItem value="medium">Media</SelectItem>
+                  <SelectItem value="high">Alta</SelectItem>
                 </SelectContent>
               </Select>
               {errors.priority && (
@@ -141,28 +155,28 @@ export function TaskForm({ task, onSubmit, onCancel }: TaskFormProps) {
 
           <div>
             <label className="block text-sm font-medium mb-1">
-              Assigned To
+              Asignado A
             </label>
             <Input
-              value={user?.full_name || user?.username || user?.email || 'Unknown User'}
+              value={user?.full_name || user?.username || user?.email || 'Usuario Desconocido'}
               disabled
               className="bg-muted cursor-not-allowed"
             />
             <p className="text-xs text-muted-foreground mt-1">
-              Tasks are automatically assigned to you
+              Las tareas se asignan automáticamente a ti
             </p>
           </div>
 
           <div className="flex justify-end space-x-2 pt-4">
             <Button type="button" variant="outline" onClick={onCancel}>
-              Cancel
+              Cancelar
             </Button>
             <Button type="submit" disabled={isSubmitting}>
               {isSubmitting
-                ? 'Saving...'
+                ? 'Guardando...'
                 : task
-                ? 'Update Task'
-                : 'Create Task'}
+                ? 'Actualizar Tarea'
+                : 'Crear Tarea'}
             </Button>
           </div>
         </form>

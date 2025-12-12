@@ -74,7 +74,7 @@ def login(
         )
     
     # Create access token
-    access_token_expires = timedelta(minutes=settings.access_token_expire_minutes)
+    access_token_expires = timedelta(days=1)
     access_token = create_access_token(
         data={"sub": user.email},
         expires_delta=access_token_expires
@@ -101,22 +101,3 @@ async def get_current_user_info(
         Current user information
     """
     return current_user
-
-# add and endpoint /users that returns a list of all users
-@router.get("/users", response_model=list[UserOut])
-def get_all_users(
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
-):
-    """
-    Get a list of all users.
-    
-    Args:
-        db: Database session
-        current_user: Current authenticated user
-        
-    Returns:
-        List of all users
-    """
-    users = db.query(User).all()
-    return users

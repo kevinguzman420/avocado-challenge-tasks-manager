@@ -12,10 +12,29 @@ import {
   SelectValue,
 } from '../components/ui/select'
 import { Dialog, DialogContent, DialogTrigger } from '../components/ui/dialog'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '../components/ui/table'
+import { Badge } from '../components/ui/badge'
 import { TaskForm } from '../components/TaskForm'
-import { TaskComments } from '../components/TaskComments'
-import { Plus, Search, Filter, Edit, Trash2, Loader2 } from 'lucide-react'
+import {
+  Plus,
+  Search,
+  Filter,
+  Edit,
+  Trash2,
+  Check,
+  X,
+  ChevronLeft,
+  ChevronRight,
+} from 'lucide-react'
 import type { Task, TaskFilters } from '../types'
+import clsx from 'clsx'
 
 function Tasks() {
   const {
@@ -32,34 +51,40 @@ function Tasks() {
   const [editingTask, setEditingTask] = useState<Task | undefined>()
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [currentPage, setCurrentPage] = useState(1)
+  const [totalTasks, setTotalTasks] = useState(0)
+  const [tasksPerPage] = useState(10)
 
   // Fetch tasks function
-  const fetchTasks = async () => {
+  const fetchTasks = async (page = currentPage) => {
     try {
       setIsLoading(true)
       setError(null)
-      const response = await tasksApi.getTasks()
+      const response = await tasksApi.getTasks(filters, page, tasksPerPage)
       // Backend returns 'items' instead of 'tasks'
       setTasks(response.items || response.tasks || [])
+      setTotalTasks(response.total || 0)
     } catch (err) {
-      setError((err as any).response?.data?.detail || 'Failed to load tasks')
+      setError((err as any).response?.data?.detail || 'Error al cargar tareas')
       console.error('Error fetching tasks:', err)
     } finally {
       setIsLoading(false)
     }
   }
 
-  // Fetch tasks on component mount
+  // Fetch tasks on component mount or when filters/page change
   useEffect(() => {
-    fetchTasks()
-  }, [])
+    fetchTasks(currentPage)
+  }, [currentPage, filters])
 
   const handleFilterChange = (key: keyof TaskFilters, value: any) => {
     setFilters({ ...filters, [key]: value })
+    setCurrentPage(1)
   }
 
   const handleSearch = () => {
     setFilters({ ...filters, search: searchTerm })
+    setCurrentPage(1)
   }
 
   const handleCreateTask = () => {
@@ -73,48 +98,73 @@ function Tasks() {
   }
 
   const handleDeleteTask = async (taskId: number) => {
-    if (confirm('Are you sure you want to delete this task?')) {
+    if (confirm('¿Estás seguro de que quieres eliminar esta tarea?')) {
       try {
         await tasksApi.deleteTask(taskId)
         deleteTask(taskId)
       } catch (err) {
         console.error('Error deleting task:', err)
         alert(
-          'Failed to delete task: ' +
-            ((err as any)?.response?.data?.detail || (err as Error)?.message || 'Unknown error'),
+          'Error al eliminar tarea: ' +
+            ((err as any)?.response?.data?.detail ||
+              (err as Error)?.message ||
+              'Error desconocido'),
         )
       }
     }
   }
 
-  const handleFormSubmit = async (data: any) => {
-    // try {
-    if (editingTask) {
-      // Update existing task
-      const updatedTask = await tasksApi.updateTask(editingTask.id, {
-        title: data.title,
-        description: data.description,
-        due_date: data.due_date,
-        priority: data.priority,
-        // assigned_to: data.assigned_to ? parseInt(data.assigned_to) : undefined,
+  const handleToggleComplete = async (task: Task) => {
+    try {
+      const updatedTask = await tasksApi.updateTask(task.id, {
+        completed: !task.completed,
       })
-      updateTask(editingTask.id, updatedTask)
-    } else {
-      // Create new task
-      const newTask = await tasksApi.createTask({
-        title: data.title,
-        description: data.description,
-        due_date: data.due_date,
-        priority: data.priority,
-        // assigned_to: data.assigned_to ? parseInt(data.assigned_to) : 0,
-      })
-      addTask(newTask)
+      updateTask(task.id, updatedTask)
+    } catch (err) {
+      console.error('Error updating task:', err)
+      alert(
+        'Error al actualizar tarea: ' +
+          ((err as any)?.response?.data?.detail ||
+            (err as Error)?.message ||
+            'Error desconocido'),
+      )
     }
-    setIsDialogOpen(false)
-    // } catch (err: any) {
-    //   console.error('Error saving task:', err);
-    //   alert('Failed to save task: ' + (err.response?.data?.detail || err.message));
-    // }
+  }
+
+  const handleFormSubmit = async (data: any) => {
+    try {
+      console.log('📝 Enviando datos de tarea:', data)
+      if (editingTask) {
+        // Update existing task
+        const updatedTask = await tasksApi.updateTask(editingTask.id, {
+          title: data.title,
+          description: data.description,
+          due_date: data.due_date,
+          priority: data.priority,
+        })
+        updateTask(editingTask.id, updatedTask)
+        console.log('✅ Tarea actualizada correctamente')
+      } else {
+        // Create new task
+        const newTask = await tasksApi.createTask({
+          title: data.title,
+          description: data.description,
+          due_date: data.due_date,
+          priority: data.priority,
+        })
+        addTask(newTask)
+        console.log('✅ Tarea creada correctamente:', newTask)
+      }
+      setIsDialogOpen(false)
+    } catch (err) {
+      console.error('❌ Error guardando tarea:', err)
+      alert(
+        'Error al guardar tarea: ' +
+          ((err as any)?.response?.data?.detail ||
+            (err as Error)?.message ||
+            'Error desconocido'),
+      )
+    }
   }
 
   const handleFormCancel = () => {
@@ -127,22 +177,26 @@ function Tasks() {
     <div>
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h1 className="text-2xl font-bold">Tasks</h1>
+          <h1 className="text-2xl font-bold">Tareas</h1>
           {isLoading && (
             <p className="text-sm text-muted-foreground mt-1">
-              Loading tasks...
+              Cargando tareas...
             </p>
           )}
         </div>
         <div className="flex space-x-2">
-          <Button variant="outline" onClick={fetchTasks} disabled={isLoading}>
-            {isLoading ? 'Loading...' : 'Refresh'}
+          <Button
+            variant="outline"
+            onClick={() => fetchTasks()}
+            disabled={isLoading}
+          >
+            {isLoading ? 'Cargando...' : 'Actualizar'}
           </Button>
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
               <Button onClick={handleCreateTask}>
                 <Plus className="h-4 w-4 mr-2" />
-                New Task
+                Nueva Tarea
               </Button>
             </DialogTrigger>
             <DialogContent className="max-w-4xl">
@@ -161,14 +215,14 @@ function Tasks() {
         <CardHeader>
           <CardTitle className="flex items-center">
             <Filter className="h-4 w-4 mr-2" />
-            Filters
+            Filtros
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
             <div className="flex space-x-2">
               <Input
-                placeholder="Search tasks..."
+                placeholder="Buscar tareas..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
@@ -187,12 +241,12 @@ function Tasks() {
               }
             >
               <SelectTrigger>
-                <SelectValue placeholder="Status" />
+                <SelectValue placeholder="Estado" />
               </SelectTrigger>
               <SelectContent className="bg-card">
-                <SelectItem value="all">All Status</SelectItem>
-                <SelectItem value="false">Pending</SelectItem>
-                <SelectItem value="true">Completed</SelectItem>
+                <SelectItem value="all">Todos los Estados</SelectItem>
+                <SelectItem value="false">Pendiente</SelectItem>
+                <SelectItem value="true">Completada</SelectItem>
               </SelectContent>
             </Select>
 
@@ -206,12 +260,12 @@ function Tasks() {
               }
             >
               <SelectTrigger>
-                <SelectValue placeholder="Assigned To" />
+                <SelectValue placeholder="Asignado A" />
               </SelectTrigger>
               <SelectContent className=" bg-card ">
-                <SelectItem value="all">All Users</SelectItem>
-                <SelectItem value="1">User 1</SelectItem>
-                <SelectItem value="2">User 2</SelectItem>
+                <SelectItem value="all">Todos los Usuarios</SelectItem>
+                <SelectItem value="1">Usuario 1</SelectItem>
+                <SelectItem value="2">Usuario 2</SelectItem>
                 {/* TODO: Load users from API */}
               </SelectContent>
             </Select>
@@ -226,13 +280,13 @@ function Tasks() {
               }
             >
               <SelectTrigger>
-                <SelectValue placeholder="Priority" />
+                <SelectValue placeholder="Prioridad" />
               </SelectTrigger>
               <SelectContent className=" bg-card ">
-                <SelectItem value="all">All Priorities</SelectItem>
-                <SelectItem value="high">High</SelectItem>
-                <SelectItem value="medium">Medium</SelectItem>
-                <SelectItem value="low">Low</SelectItem>
+                <SelectItem value="all">Todas las Prioridades</SelectItem>
+                <SelectItem value="high">Alta</SelectItem>
+                <SelectItem value="medium">Media</SelectItem>
+                <SelectItem value="low">Baja</SelectItem>
               </SelectContent>
             </Select>
 
@@ -243,7 +297,7 @@ function Tasks() {
                 setSearchTerm('')
               }}
             >
-              Clear Filters
+              Limpiar Filtros
             </Button>
           </div>
         </CardContent>
@@ -255,7 +309,7 @@ function Tasks() {
           <div className="flex">
             <div className="ml-3">
               <h3 className="text-sm font-medium text-red-800">
-                Error loading tasks
+                Error al cargar tareas
               </h3>
               <div className="mt-2 text-sm text-red-700">
                 <p>{error}</p>
@@ -265,11 +319,11 @@ function Tasks() {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={fetchTasks}
+                    onClick={() => fetchTasks()}
                     disabled={isLoading}
                     className="bg-red-50 px-2 py-1.5 rounded-md text-sm font-medium text-red-800 hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-red-50 focus:ring-red-600"
                   >
-                    {isLoading ? 'Loading...' : 'Try Again'}
+                    {isLoading ? 'Cargando...' : 'Intentar de Nuevo'}
                   </Button>
                 </div>
               </div>
@@ -278,75 +332,157 @@ function Tasks() {
         </div>
       )}
 
-      {/* Tasks List */}
-      <div className="space-y-4">
-        {tasks.length === 0 ? (
-          <Card>
-            <CardContent className="text-center py-8">
-              <p className="text-muted-foreground">No tasks found</p>
-            </CardContent>
-          </Card>
-        ) : (
-          tasks.map((task) => (
-            <Card key={task.id}>
-              <CardContent className="p-6">
-                <div className="flex justify-between items-start">
-                  <div className="flex-1">
-                    <h3 className="font-semibold">{task.title}</h3>
-                    <p className="text-sm text-muted-foreground mt-1">
-                      {task.description}
-                    </p>
-                    <div className="flex items-center space-x-4 mt-2 text-sm">
-                      <span
-                        className={`px-2 py-1 rounded-full text-xs ${
-                          task.priority === 'high'
-                            ? 'bg-red-100 text-red-800'
-                            : task.priority === 'medium'
-                            ? 'bg-yellow-100 text-yellow-800'
-                            : 'bg-green-100 text-green-800'
-                        }`}
+      {/* Tasks Table */}
+      <Card>
+        <CardContent className="p-0">
+          {tasks.length === 0 ? (
+            <div className="text-center py-8">
+              <p className="text-muted-foreground">No se encontraron tareas</p>
+            </div>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-[50px]">Estado</TableHead>
+                  <TableHead>Título</TableHead>
+                  <TableHead>Descripción</TableHead>
+                  <TableHead>Prioridad</TableHead>
+                  <TableHead>Fecha Límite</TableHead>
+                  <TableHead className="text-right">Acciones</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {tasks.map((task) => (
+                  <TableRow key={task.id}>
+                    <TableCell>
+                      <Button
+                        variant={task.completed ? 'default' : 'outline'}
+                        size="sm"
+                        onClick={() => handleToggleComplete(task)}
+                        className={clsx(
+                          ' bg-gray-200 hover:bg-gray-300 ',
+                          task.completed
+                            ? 'bg-green-600 hover:bg-green-700 text-black dark:text-white'
+                            : 'border-gray-300 text-gray-600 ',
+                        )}
                       >
-                        {task.priority}
-                      </span>
+                        {task.completed ? (
+                          <Check className="h-4 w-4" />
+                        ) : (
+                          <X className="h-4 w-4 text-black " />
+                        )}
+                      </Button>
+                    </TableCell>
+                    <TableCell className="font-medium">
                       <span
                         className={
-                          task.completed ? 'text-green-600' : 'text-yellow-600'
+                          task.completed
+                            ? 'line-through text-muted-foreground'
+                            : ''
                         }
                       >
-                        {task.completed ? 'Completed' : 'Pending'}
+                        {task.title}
                       </span>
-                      <span>
-                        Due: {new Date(task.due_date).toLocaleDateString()}
+                    </TableCell>
+                    <TableCell className="max-w-md">
+                      <span className="text-sm text-muted-foreground line-clamp-2">
+                        {task.description}
                       </span>
-                    </div>
-                  </div>
-                  <div className="flex space-x-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleEditTask(task)}
-                    >
-                      <Edit className="h-4 w-4 mr-1" />
-                      Edit
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleDeleteTask(task.id)}
-                    >
-                      <Trash2 className="h-4 w-4 mr-1" />
-                      Delete
-                    </Button>
-                  </div>
+                    </TableCell>
+                    <TableCell>
+                      <Badge
+                        variant={
+                          task.priority === 'high' ? 'destructive' : 'secondary'
+                        }
+                        className={
+                          task.priority === 'medium'
+                            ? 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200'
+                            : task.priority === 'low'
+                            ? 'bg-green-100 text-green-800 hover:bg-green-200'
+                            : ''
+                        }
+                      >
+                        {task.priority === 'high'
+                          ? 'Alta'
+                          : task.priority === 'medium'
+                          ? 'Media'
+                          : 'Baja'}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <span className="text-sm">
+                        {new Date(task.due_date).toLocaleDateString('es-ES', {
+                          day: '2-digit',
+                          month: '2-digit',
+                          year: 'numeric',
+                        })}
+                      </span>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex justify-end space-x-2">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleEditTask(task)}
+                        >
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleDeleteTask(task.id)}
+                          className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Pagination */}
+      {totalTasks > 0 && (
+        <Card className="mt-4">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div className="text-sm text-muted-foreground">
+                Mostrando{' '}
+                {Math.min((currentPage - 1) * tasksPerPage + 1, totalTasks)} a{' '}
+                {Math.min(currentPage * tasksPerPage, totalTasks)} de{' '}
+                {totalTasks} tareas
+              </div>
+              <div className="flex items-center space-x-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                  disabled={currentPage === 1}
+                >
+                  <ChevronLeft className="h-4 w-4 mr-1" />
+                  Anterior
+                </Button>
+                <div className="text-sm font-medium">
+                  Página {currentPage} de {Math.ceil(totalTasks / tasksPerPage)}
                 </div>
-                <div className="mt-4 pt-4 border-t">
-                  <TaskComments taskId={task.id} />
-                </div>
-              </CardContent>
-            </Card>
-          ))
-        )}
-      </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCurrentPage((p) => p + 1)}
+                  disabled={currentPage >= Math.ceil(totalTasks / tasksPerPage)}
+                >
+                  Siguiente
+                  <ChevronRight className="h-4 w-4 ml-1" />
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
     </div>
   )
 }

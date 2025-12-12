@@ -31,16 +31,22 @@ export function Layout({ children }: LayoutProps) {
     root.classList.add(theme)
   }, [theme])
 
+  const isAdmin = user?.role === 'admin'
+
   const navigation = [
-    { name: 'Dashboard', href: '/', icon: Home },
-    { name: 'Tasks', href: '/tasks', icon: CheckSquare },
-    { name: 'Statistics', href: '/stats', icon: BarChart3 },
-    { name: 'Users', href: '/users', icon: Users, adminOnly: true },
+    { name: 'Panel de Control', href: isAdmin ? '/admin/dashboard' : '/', icon: Home },
+    { name: 'Tareas', href: '/tasks', icon: CheckSquare, hideForAdmin: true },
+    { name: 'Estadísticas', href: isAdmin ? '/admin/stats' : '/stats', icon: BarChart3 },
+    { name: 'Usuarios', href: '/users', icon: Users, adminOnly: true },
   ]
 
-  const filteredNavigation = navigation.filter(
-    (item) => !item.adminOnly || user?.role === 'admin',
-  )
+  const filteredNavigation = navigation.filter((item) => {
+    // Hide items marked as adminOnly if user is not admin
+    if (item.adminOnly && !isAdmin) return false
+    // Hide items marked as hideForAdmin if user is admin
+    if (item.hideForAdmin && isAdmin) return false
+    return true
+  })
 
   return (
     <div className=" container min-h-screen bg-background">
@@ -95,7 +101,7 @@ export function Layout({ children }: LayoutProps) {
               </p>
             </div>
             <Button variant="ghost" size="sm" onClick={logout}>
-              Logout
+              Cerrar Sesión
             </Button>
           </div>
         </div>

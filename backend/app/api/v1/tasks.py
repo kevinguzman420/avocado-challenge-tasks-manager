@@ -48,6 +48,7 @@ def get_tasks(
     limit: int = Query(100, ge=1, le=100),
     completed: Optional[bool] = None,
     priority: Optional[str] = None,
+    assigned_to: Optional[int] = Query(None, description="Filter by assigned user ID (admin only)"),
     search: Optional[str] = None,
     sort_by: str = Query("created_at", description="Field to sort by"),
     sort_order: str = Query("desc", regex="^(asc|desc)$"),
@@ -55,13 +56,19 @@ def get_tasks(
     current_user: User = Depends(get_current_user)
 ):
     """
-    Get list of tasks assigned to the current user with filtering, sorting, and pagination.
+    Get list of tasks with filtering, sorting, and pagination.
+    
+    - Regular users: Only see their own tasks (assigned_to parameter is ignored)
+    - Admin users: 
+        - If assigned_to is provided, see tasks for that specific user
+        - If assigned_to is not provided, see all tasks in the system
     
     Args:
         skip: Number of records to skip
         limit: Maximum number of records to return
         completed: Filter by completion status
         priority: Filter by priority
+        assigned_to: Filter by assigned user ID (admin only)
         search: Search term for title and description
         sort_by: Field to sort by
         sort_order: Sort order (asc/desc)
@@ -69,14 +76,24 @@ def get_tasks(
         current_user: Current authenticated user
         
     Returns:
-        Paginated list of tasks assigned to the current user
+        Paginated list of tasks based on user role and filters
     """
-    # Build filters - always filter by current user's assigned tasks
+    from app.models.user import UserRole
+    
+    # Determine assigned_to filter based on user role
+    if current_user.role == UserRole.ADMIN:
+        # Admin can filter by specific user or see all tasks
+        filter_assigned_to = assigned_to  # Can be None (all tasks) or specific user ID
+    else:
+        # Regular users always see only their own tasks
+        filter_assigned_to = current_user.id
+    
+    # Build filters
     filters = TaskFilter(
         completed=completed,
         priority=priority,
         created_by=None,
-        assigned_to=current_user.id,
+        assigned_to=filter_assigned_to,
         search=search
     )
     

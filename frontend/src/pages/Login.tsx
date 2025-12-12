@@ -13,8 +13,8 @@ import { authApi } from '../api/auth';
 import { Loader2, Eye, EyeOff } from 'lucide-react';
 
 const loginSchema = z.object({
-  email: z.string().email('Invalid email address'),
-  password: z.string().min(1, 'Password is required'),
+  email: z.string().email('Dirección de correo electrónico inválida'),
+  password: z.string().min(1, 'La contraseña es requerida'),
 });
 
 type LoginFormData = z.infer<typeof loginSchema>;
@@ -68,7 +68,7 @@ function Login() {
       login(user, response.access_token);
       navigate('/');
     } catch (err: any) {
-      setError(err.response?.data?.detail || 'Login failed. Please check your credentials.');
+      setError(err.response?.data?.detail || 'Inicio de sesión fallido. Por favor verifica tus credenciales.');
     } finally {
       setIsLoading(false);
     }
@@ -81,9 +81,9 @@ function Login() {
       </div>
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl text-center">Sign In</CardTitle>
+          <CardTitle className="text-2xl text-center">Iniciar Sesión</CardTitle>
           <CardDescription className="text-center">
-            Enter your email and password to access your account
+            Ingresa tu correo electrónico y contraseña para acceder a tu cuenta
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -102,12 +102,12 @@ function Login() {
 
             <div className="space-y-2">
               <label htmlFor="email" className="text-sm font-medium">
-                Email
+                Correo Electrónico
               </label>
               <Input
                 id="email"
                 type="email"
-                placeholder="Enter your email"
+                placeholder="Ingresa tu correo electrónico"
                 {...register('email')}
                 disabled={isLoading}
               />
@@ -118,13 +118,13 @@ function Login() {
 
             <div className="space-y-2">
               <label htmlFor="password" className="text-sm font-medium">
-                Password
+                Contraseña
               </label>
               <div className="relative">
                 <Input
                   id="password"
                   type={showPassword ? 'text' : 'password'}
-                  placeholder="Enter your password"
+                  placeholder="Ingresa tu contraseña"
                   {...register('password')}
                   disabled={isLoading}
                 />
@@ -150,14 +150,14 @@ function Login() {
 
             <Button type="submit" className="w-full" disabled={isLoading}>
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Sign In
+              Iniciar Sesión
             </Button>
           </form>
 
           <div className="mt-4 text-center text-sm">
-            Don't have an account?{' '}
+            ¿No tienes una cuenta?{' '}
             <Link to="/signup" className="text-primary hover:underline">
-              Sign up
+              Regístrate
             </Link>
           </div>
         </CardContent>

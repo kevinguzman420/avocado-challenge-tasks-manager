@@ -64,3 +64,11 @@ export interface CreateTaskData {
   priority: 'low' | 'medium' | 'high';
   // assigned_to: number;
 }
+
+export interface UpdateTaskData {
+  title?: string;
+  description?: string;
+  due_date?: string;
+  priority?: 'low' | 'medium' | 'high';
+  completed?: boolean;
+}
